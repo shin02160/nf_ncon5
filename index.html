@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>NCon5 투어 관람 트래커 · into REM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Sacramento&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+/* ─── Reset & Base ─── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%;overflow:hidden}
+body{height:100%;background:#05070f;color:#eaf2ff;font-family:'Pretendard Variable','Pretendard',sans-serif;font-size:14px;overflow:hidden;-webkit-font-smoothing:antialiased}
+
+/* ─── Design Tokens ─── */
+:root{
+  --bg:         #05070f;
+  --bg2:        #070a16;
+  --card:       #0a0f1e;
+  --card2:      #0c1426;
+  --card3:      #070b18;
+  --text:       #eaf2ff;
+  --text2:      #9fb0cc;
+  --muted:      #5d6b85;
+  --cyan:       #7fe6f0;
+  --cyan-l:     #aef6fb;
+  --violet:     #b9a7e6;
+  --violet-l:   #e6dcff;
+  --amber:      #f2b48a;
+  --amber-l:    #ffd9bd;
+  --green:      #86e3b4;
+  --pink:       #ef9cc2;
+  --pink-l:     #ffd7e8;
+  --border:     rgba(143,233,240,.1);
+  --border2:    rgba(143,233,240,.22);
+  --r-card:     16px;
+  --r-chip:     20px;
+}
+
+/* ─── Layout ─── */
+#app{display:flex;flex-direction:column;height:100%;max-width:430px;margin:0 auto;position:relative;overflow:hidden}
+.views{flex:1;overflow:hidden;position:relative}
+.view{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:16px 16px 80px;display:none;scrollbar-width:thin;scrollbar-color:rgba(127,230,240,.15) transparent}
+.view.active{display:block}
+.view::-webkit-scrollbar{width:3px}
+.view::-webkit-scrollbar-track{background:transparent}
+.view::-webkit-scrollbar-thumb{background:rgba(127,230,240,.2);border-radius:3px}
+
+/* ─── Bottom Nav ─── */
+.bottom-nav{flex-shrink:0;background:rgba(7,10,22,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(143,233,240,.08);display:flex;height:64px;padding-bottom:env(safe-area-inset-bottom)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:none;border:none;color:var(--muted);font-size:10px;font-family:'Pretendard Variable','Pretendard',sans-serif;font-weight:500;cursor:pointer;transition:color .2s;padding:8px 0}
+.nav-btn svg{width:20px;height:20px;opacity:.5;transition:opacity .2s}
+.nav-btn.active{color:var(--cyan)}
+.nav-btn.active svg{opacity:1}
+
+/* ─── Section headers ─── */
+.view-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-top:4px}
+.view-title{font-size:20px;font-weight:800;letter-spacing:-.5px}
+.view-sub{font-size:12px;color:var(--text2);font-family:'Space Grotesk',sans-serif}
+
+/* ─── Cards ─── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);padding:16px}
+.card+.card{margin-top:10px}
+
+/* ─── Hero summary card ─── */
+.hero-card{background:radial-gradient(ellipse 80% 80% at 50% 0%,rgba(239,156,194,.15) 0%,transparent 70%),linear-gradient(160deg,#0c0f20 0%,#070a16 100%);border:1px solid rgba(127,230,240,.15);border-radius:18px;padding:18px 18px 16px;position:relative;overflow:hidden}
+.hero-stars{position:absolute;inset:0;pointer-events:none}
+.hero-star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--dur,2s) ease-in-out infinite;animation-delay:var(--delay,0s)}
+.hero-label{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--cyan);text-transform:uppercase;margin-bottom:12px;position:relative}
+.hero-count-row{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px;position:relative}
+.hero-big{font-family:'Space Grotesk',sans-serif;font-size:46px;font-weight:700;line-height:1;color:var(--text)}
+.hero-big span{font-size:16px;font-weight:500;color:var(--text2);margin-left:4px}
+.hero-pill{background:rgba(242,180,138,.15);color:var(--amber);border:1px solid rgba(242,180,138,.3);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;font-family:'Space Grotesk',sans-serif;align-self:flex-start;margin-top:6px}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;position:relative}
+.hero-stat{background:rgba(255,255,255,.03);border-radius:10px;padding:8px 10px}
+.hero-stat-label{font-size:9px;color:var(--muted);margin-bottom:3px;font-weight:600;letter-spacing:.5px}
+.hero-stat-val{font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif;color:var(--text)}
+
+/* ─── Region progress ─── */
+.region-section{margin-top:10px}
+.region-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.region-title{font-size:13px;font-weight:700}
+.region-hint{font-size:10px;color:var(--muted)}
+.region-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.region-row:last-child{border-bottom:none}
+.region-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.region-name{font-size:13px;font-weight:600;flex:1}
+.region-count{font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--text2);white-space:nowrap}
+.region-bar-wrap{flex:2;height:5px;background:rgba(255,255,255,.06);border-radius:5px;overflow:hidden}
+.region-bar{height:100%;border-radius:5px;transition:width .5s ease}
+
+/* ─── Session list (History) ─── */
+.history-header{display:flex;align-items:baseline;gap:8px;margin-bottom:14px}
+.history-total{font-size:16px;font-weight:700}
+.history-counts{font-size:12px;color:var(--text2);font-family:'Space Grotesk',sans-serif}
+.session-row{display:flex;align-items:center;gap:0;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.025);margin-bottom:7px;position:relative;overflow:hidden;transition:border-color .2s,background .2s}
+.session-accent{position:absolute;left:0;top:6px;bottom:6px;width:3px;border-radius:3px}
+.session-num{font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:600;color:var(--muted);width:18px;flex-shrink:0;margin-left:8px}
+.session-info{flex:1;margin-left:8px}
+.session-date{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;color:var(--text)}
+.session-seat{font-size:10px;color:var(--muted);margin-top:2px}
+.session-city-tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;flex-shrink:0}
+.session-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0;margin-left:auto;white-space:nowrap}
+
+/* ─── Schedule (3-state) ─── */
+.schedule-row{display:flex;align-items:center;gap:0;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.025);margin-bottom:8px;cursor:pointer;user-select:none;transition:border-color .2s,background .2s;position:relative;overflow:hidden}
+.schedule-row:active{scale:.98}
+.schedule-num{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;color:var(--muted);width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.schedule-info{flex:1;margin-left:10px}
+.schedule-date{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600}
+.schedule-time{font-size:11px;color:var(--text2);margin-top:1px}
+.schedule-badge{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;flex-shrink:0;white-space:nowrap}
+.schedule-progress{margin-top:12px;padding:10px 14px;background:rgba(255,255,255,.025);border-radius:10px;border:1px solid var(--border)}
+.progress-label{font-size:11px;color:var(--text2);margin-bottom:6px;display:flex;justify-content:space-between}
+.progress-track{height:5px;background:rgba(255,255,255,.07);border-radius:5px;overflow:hidden}
+.progress-fill{height:100%;background:var(--cyan);border-radius:5px;transition:width .4s ease}
+.city-group-header{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--cyan);text-transform:uppercase;margin:16px 0 8px;padding-left:2px}
+
+/* ─── Seat chart ─── */
+.city-tabs{display:flex;gap:6px;margin-bottom:14px}
+.city-tab{flex:1;padding:6px 0;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:700;font-family:'Pretendard Variable','Pretendard',sans-serif;cursor:pointer;transition:.2s}
+.city-tab.active{color:#06121a;background:var(--cyan);border-color:var(--cyan)}
+.venue-info{margin-bottom:12px}
+.venue-name{font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:space-between}
+.venue-session{font-size:11px;color:var(--cyan);font-family:'Space Grotesk',sans-serif}
+.venue-sub{font-size:11px;color:var(--text2);margin-top:3px}
+.svg-frame{background:rgba(6,10,24,.8);border:1px solid rgba(127,230,240,.12);border-radius:14px;padding:10px;margin-bottom:12px;overflow:hidden}
+.svg-frame svg{width:100%;height:auto;display:block}
+.seat-label{font-size:11px;color:var(--text2);margin-bottom:6px}
+.seat-input-row{display:flex;gap:8px;margin-bottom:10px}
+.seat-input{flex:1;background:rgba(255,255,255,.04);border:1px dashed rgba(143,233,240,.25);border-radius:10px;padding:9px 12px;color:var(--text);font-size:12px;font-family:'Pretendard Variable','Pretendard',sans-serif;outline:none}
+.seat-input::placeholder{color:var(--muted)}
+.seat-input:focus{border-color:rgba(143,233,240,.5);background:rgba(127,230,240,.04)}
+.seat-add-btn{background:rgba(127,230,240,.1);border:1px solid rgba(127,230,240,.2);border-radius:10px;padding:9px 12px;color:var(--cyan);font-size:18px;cursor:pointer;transition:.2s}
+.seat-add-btn:hover{background:rgba(127,230,240,.18)}
+.seat-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;min-height:28px}
+.seat-chip{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.seat-chip-remove{background:none;border:none;color:inherit;cursor:pointer;font-size:12px;opacity:.7;padding:0;line-height:1}
+.save-btn{width:100%;padding:13px;border-radius:12px;background:var(--cyan);color:#06121a;font-size:13px;font-weight:800;font-family:'Pretendard Variable','Pretendard',sans-serif;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s}
+.save-btn:hover{background:#a0eff8}
+.save-btn:active{scale:.97}
+.save-btn.saving{background:rgba(127,230,240,.5);pointer-events:none}
+.save-btn.saved{background:rgba(127,230,240,.3);color:var(--cyan)}
+
+/* ─── Desktop right pane (hidden by default, shown on desktop only) ─── */
+.desktop-right{display:none}
+
+/* ─── Settlement ─── */
+.settlement-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.stat-tile{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center}
+.stat-tile-val{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--cyan)}
+.stat-tile-label{font-size:10px;color:var(--muted);margin-top:3px;font-weight:600}
+.settlement-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.settlement-row:last-child{border-bottom:none}
+.settlement-city{font-size:13px;font-weight:600;width:36px;flex-shrink:0}
+.settlement-bar-wrap{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:5px;overflow:hidden}
+.settlement-bar{height:100%;border-radius:5px;transition:width .5s}
+.settlement-count{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:var(--text);width:24px;text-align:right}
+
+/* ─── Animations ─── */
+@keyframes twinkle{0%,100%{opacity:.2}50%{opacity:.8}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.view.active .card,.view.active .hero-card{animation:fadeUp .28s ease both}
+.view.active .card:nth-child(2){animation-delay:.05s}
+.view.active .card:nth-child(3){animation-delay:.1s}
+.view.active .session-row:nth-child(1){animation:fadeUp .22s ease both}
+.view.active .session-row:nth-child(2){animation:fadeUp .22s .04s ease both}
+.view.active .session-row:nth-child(3){animation:fadeUp .22s .08s ease both}
+
+/* ─── Desktop layout ─── */
+@media(min-width:800px){
+  html,body{overflow:auto;height:auto}
+  #app{max-width:1180px;flex-direction:row;height:100vh;overflow:hidden}
+
+  /* Sidebar */
+  .desktop-sidebar{width:222px;flex-shrink:0;background:#080c1c;border-right:1px solid rgba(143,233,240,.07);display:flex;flex-direction:column;padding:24px 16px;overflow-y:auto}
+  .sidebar-logo{margin-bottom:28px}
+  .sidebar-logo img{height:26px}
+  .sidebar-nav{display:flex;flex-direction:column;gap:4px;margin-bottom:28px}
+  .sidebar-nav-btn{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;background:none;border:none;color:var(--muted);font-size:13px;font-family:'Pretendard Variable','Pretendard',sans-serif;font-weight:600;cursor:pointer;transition:.2s;width:100%;text-align:left}
+  .sidebar-nav-btn svg{width:16px;height:16px;opacity:.5;flex-shrink:0}
+  .sidebar-nav-btn.active{background:rgba(127,230,240,.08);color:var(--cyan)}
+  .sidebar-nav-btn.active svg{opacity:1}
+  .sidebar-cities{margin-bottom:auto}
+  .sidebar-cities-label{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;padding-left:4px}
+  .sidebar-city-item{display:flex;align-items:center;padding:7px 10px;border-radius:8px;cursor:pointer;transition:.2s}
+  .sidebar-city-item:hover{background:rgba(255,255,255,.04)}
+  .sidebar-city-item .dot{width:8px;height:8px;border-radius:50%;margin-right:8px;flex-shrink:0}
+  .sidebar-city-name{flex:1;font-size:12px;font-weight:600;color:var(--text2)}
+  .sidebar-city-count{font-size:11px;color:var(--muted);font-family:'Space Grotesk',sans-serif}
+  .sidebar-promo{background:linear-gradient(135deg,rgba(127,230,240,.07),rgba(185,167,230,.07));border:1px solid rgba(127,230,240,.1);border-radius:12px;padding:14px;margin-top:16px}
+  .sidebar-promo-label{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--cyan);text-transform:uppercase;margin-bottom:4px}
+  .sidebar-promo-val{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;color:var(--text);line-height:1.1}
+  .sidebar-promo-sub{font-size:10px;color:var(--text2);margin-top:3px}
+
+  /* Main */
+  .views{flex:1;display:flex;flex-direction:row;overflow:hidden}
+  .bottom-nav{display:none}
+  .view{position:relative;flex:1;padding:0;display:none;overflow-y:auto}
+  .view.active{display:flex;flex-direction:column}
+
+  /* Desktop seatchart center pane */
+  #view-seatchart{padding:28px 28px 24px}
+
+  /* Other views desktop padding */
+  #view-home,#view-history,#view-schedule,#view-settlement{padding:28px 28px 24px}
+
+  /* Right pane */
+  .desktop-right{width:316px;flex-shrink:0;background:#07091a;border-left:1px solid rgba(143,233,240,.07);padding:24px 18px;overflow-y:auto;display:none}
+  .desktop-right.active{display:block}
+
+  /* Desktop seat chart venue header */
+  .desk-venue-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+  .desk-venue-title{font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px}
+  .desk-venue-dot{width:9px;height:9px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);flex-shrink:0}
+  .desk-venue-meta{font-size:12px;color:var(--text2);margin-top:4px}
+  .desk-city-tabs{display:flex;gap:6px}
+  .desk-city-tab{padding:6px 16px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:700;font-family:'Pretendard Variable','Pretendard',sans-serif;cursor:pointer;transition:.2s}
+  .desk-city-tab.active{color:#06121a;background:var(--cyan);border-color:var(--cyan)}
+
+  /* Legend */
+  .chart-legend{display:flex;align-items:center;gap:18px;margin-top:14px;margin-bottom:18px;padding:10px 14px;background:rgba(255,255,255,.02);border-radius:10px;border:1px solid rgba(255,255,255,.05)}
+  .chart-legend-label{font-size:11px;color:var(--muted);font-weight:600;margin-right:4px}
+  .legend-item{display:flex;align-items:center;gap:5px;font-size:11px;font-family:'Space Grotesk',sans-serif;font-weight:600}
+  .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Desktop sidebar (hidden on mobile) -->
+  <aside class="desktop-sidebar" id="desktopSidebar" style="display:none">
+    <div class="sidebar-logo">
+      <img src="assets/nflying-logo-white.png" alt="N.Flying">
+    </div>
+    <nav class="sidebar-nav">
+      <button class="sidebar-nav-btn" data-view="schedule" onclick="switchView('schedule',true)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        공연 일정
+      </button>
+      <button class="sidebar-nav-btn active" data-view="seatchart" onclick="switchView('seatchart',true)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="7"/><path d="M9 10h6M12 7v6"/></svg>
+        좌석 배치도
+      </button>
+      <button class="sidebar-nav-btn" data-view="settlement" onclick="switchView('settlement',true)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        정산
+      </button>
+    </nav>
+    <div class="sidebar-cities">
+      <div class="sidebar-cities-label">Cities</div>
+      <div id="sidebarCities"></div>
+    </div>
+    <div class="sidebar-promo">
+      <div class="sidebar-promo-label">Total</div>
+      <div class="sidebar-promo-val" id="sidebarTotal">0</div>
+      <div class="sidebar-promo-sub">관람 완료</div>
+    </div>
+  </aside>
+
+  <div class="views">
+
+    <!-- ═══ VIEW: HOME ═══ -->
+    <div class="view active" id="view-home">
+      <div class="view-header">
+        <div>
+          <div style="font-family:'Sacramento',cursive;font-size:22px;color:var(--cyan);line-height:1.1">into</div>
+          <div class="view-title">전체 현황</div>
+        </div>
+        <div class="view-sub">2026 LIVE &amp;CON5</div>
+      </div>
+
+      <!-- Hero card -->
+      <div class="hero-card" id="heroCard">
+        <div class="hero-stars" id="heroStars"></div>
+        <div class="hero-label">MY &amp;CON5 JOURNEY</div>
+        <div class="hero-count-row">
+          <div>
+            <span class="hero-big" id="heroDone">0</span>
+            <span class="hero-big" style="font-size:18px;color:var(--text2)"> / 9회 관람</span>
+          </div>
+          <div class="hero-pill" id="heroPlan">예정 0회</div>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-label">관람 지역</div>
+            <div class="hero-stat-val" id="heroRegions">0곳</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-label">첫 관람</div>
+            <div class="hero-stat-val" id="heroFirst">—</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-label">마지막</div>
+            <div class="hero-stat-val" id="heroLast">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Region progress -->
+      <div class="card region-section" style="margin-top:10px">
+        <div class="region-header">
+          <div class="region-title">지역별 관람 현황</div>
+          <div class="region-hint">관람 / 가능</div>
+        </div>
+        <div id="regionProgress"></div>
+      </div>
+    </div>
+
+    <!-- ═══ VIEW: HISTORY ═══ -->
+    <div class="view" id="view-history">
+      <div class="history-header">
+        <div class="history-total">전체 9회차</div>
+        <div class="history-counts" id="historyCounts">0 관람 · 0 예정</div>
+      </div>
+      <div id="historyList"></div>
+    </div>
+
+    <!-- ═══ VIEW: SEAT CHART ═══ -->
+    <div class="view" id="view-seatchart">
+
+      <!-- Desktop venue header (hidden on mobile) -->
+      <div class="desk-venue-header" id="deskVenueHeader" style="display:none">
+        <div>
+          <div class="desk-venue-title">
+            <span id="deskCityName">서울</span>
+            <span style="color:var(--text2);font-weight:400">·</span>
+            <span id="deskVenueName" style="font-size:16px;font-weight:700;color:var(--text2)">티켓링크 라이브 아레나</span>
+            <div class="desk-venue-dot"></div>
+          </div>
+          <div class="desk-venue-meta" id="deskVenueMeta">2026.07.31 – 08.02 · Standing A/B/C + 2F 37–50구역</div>
+        </div>
+        <div class="desk-city-tabs" id="deskCityTabs">
+          <button class="desk-city-tab active" data-city="서울" onclick="selectCity('서울')">서울</button>
+          <button class="desk-city-tab" data-city="대구" onclick="selectCity('대구')">대구</button>
+          <button class="desk-city-tab" data-city="부산" onclick="selectCity('부산')">부산</button>
+          <button class="desk-city-tab" data-city="광주" onclick="selectCity('광주')">광주</button>
+        </div>
+      </div>
+
+      <!-- Mobile header -->
+      <div id="mobileVenueHeader">
+        <div class="view-header" style="margin-bottom:10px">
+          <div class="view-title">좌석 배치도</div>
+        </div>
+        <div class="city-tabs" id="cityTabs">
+          <button class="city-tab active" data-city="서울" onclick="selectCity('서울')">서울</button>
+          <button class="city-tab" data-city="대구" onclick="selectCity('대구')">대구</button>
+          <button class="city-tab" data-city="부산" onclick="selectCity('부산')">부산</button>
+          <button class="city-tab" data-city="광주" onclick="selectCity('광주')">광주</button>
+        </div>
+        <div class="venue-info">
+          <div class="venue-name">
+            <span id="venueNameMob">티켓링크 라이브 아레나</span>
+            <span class="venue-session" id="seoulSession">3회차</span>
+          </div>
+          <div class="venue-sub" id="venueSubMob">Standing A/B/C · 2F 37–50</div>
+        </div>
+      </div>
+
+      <div class="svg-frame" id="seatSvgFrame">
+        <!-- SVG injected by JS -->
+      </div>
+
+      <!-- Legend (desktop only) -->
+      <div class="chart-legend" id="chartLegend" style="display:none">
+        <span class="chart-legend-label">관람 횟수</span>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(127,230,240,.4)"></div><span style="color:var(--text2)">1회</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(127,230,240,.7)"></div><span style="color:var(--text2)">3회</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div><span style="color:var(--text2)">5회+</span></div>
+      </div>
+
+      <div class="seat-label">내 좌석 · 최대 2</div>
+      <div class="seat-input-row">
+        <input class="seat-input" id="seatInput" type="text" placeholder="구역명 + 번호 입력 (예: 48구역 89번)">
+        <button class="seat-add-btn" onclick="addSeat()">＋</button>
+      </div>
+      <div class="seat-chips" id="seatChips"></div>
+      <button class="save-btn" id="saveBtn" onclick="exportSeatImage()">
+        <span>⤓</span> 좌석 이미지로 저장
+      </button>
+    </div>
+
+    <!-- ═══ VIEW: SCHEDULE ═══ -->
+    <div class="view" id="view-schedule">
+      <div class="view-header">
+        <div class="view-title">공연 일정</div>
+      </div>
+      <div class="schedule-progress card" style="margin-bottom:14px">
+        <div class="progress-label">
+          <span>관람 완료</span>
+          <span id="scheduleProgressLabel">0 / 9</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="scheduleProgressFill" style="width:0%"></div></div>
+      </div>
+      <div id="scheduleList"></div>
+    </div>
+
+    <!-- ═══ VIEW: SETTLEMENT ═══ -->
+    <div class="view" id="view-settlement">
+      <div class="view-header">
+        <div class="view-title">지역별 정산</div>
+      </div>
+      <div class="settlement-summary">
+        <div class="stat-tile"><div class="stat-tile-val">4</div><div class="stat-tile-label">개 도시</div></div>
+        <div class="stat-tile"><div class="stat-tile-val">9</div><div class="stat-tile-label">stages</div></div>
+        <div class="stat-tile"><div class="stat-tile-val" id="settleZone">44구역</div><div class="stat-tile-label">최애</div></div>
+      </div>
+      <div class="card">
+        <div class="region-header">
+          <div class="region-title">지역별 관람 횟수</div>
+        </div>
+        <div id="settlementBars"></div>
+      </div>
+      <div class="card" style="margin-top:10px">
+        <div class="region-title" style="margin-bottom:12px">요약</div>
+        <div id="settlementSummary" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
+
+  </div><!-- /views -->
+
+  <!-- Desktop right pane -->
+  <aside class="desktop-right" id="desktopRight">
+    <div style="font-size:13px;font-weight:700;margin-bottom:14px;color:var(--text)">회차별 좌석</div>
+    <div id="rightSessionList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:18px"></div>
+    <div style="height:1px;background:rgba(255,255,255,.06);margin:0 -4px 16px"></div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--text)">지역별 정산</div>
+    <div id="rightSettlementBars"></div>
+    <button class="save-btn" style="margin-top:18px" onclick="exportSeatImage()">
+      <span>⤓</span> 좌석 배치도 이미지로 저장
+    </button>
+  </aside>
+
+  <!-- Bottom nav (mobile) -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-view="home" onclick="switchView('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      홈
+    </button>
+    <button class="nav-btn" data-view="history" onclick="switchView('history')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 110 20A10 10 0 0112 2z"/><polyline points="12 6 12 12 16 14"/></svg>
+      이력
+    </button>
+    <button class="nav-btn" data-view="seatchart" onclick="switchView('seatchart')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4" fill="currentColor" fill-opacity=".3"/></svg>
+      좌석
+    </button>
+    <button class="nav-btn" data-view="schedule" onclick="switchView('schedule')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      일정
+    </button>
+    <button class="nav-btn" data-view="settlement" onclick="switchView('settlement')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      정산
+    </button>
+  </nav>
+</div>
+
+<script>
+// ─── Data ───────────────────────────────────────────────────────────────────
+const CITIES = {
+  서울: { color: '#7fe6f0', possible: 3, venue: '티켓링크 라이브 아레나', meta: '2026.07.31 – 08.02 · Standing A/B/C + 2F 37–50구역', session: '3회차', sub: 'Standing A/B/C · 2F 37–50' },
+  대구: { color: '#b9a7e6', possible: 2, venue: 'EXCO 오디토리움', meta: '2026.08.08 – 08.09 · Standing A/B/C', session: '2회차', sub: 'Standing A/B/C' },
+  부산: { color: '#f2b48a', possible: 2, venue: 'BEXCO 오디토리움', meta: '2026.08.15 – 08.16 · Standing A/B/C', session: '2회차', sub: 'Standing A/B/C' },
+  광주: { color: '#86e3b4', possible: 2, venue: 'GWN컨벤션센터', meta: '2026.08.22 – 08.23 · Standing A/B/C', session: '2회차', sub: 'Standing A/B/C' },
+};
+
+const DEFAULT_SESSIONS = [
+  { n:1, date:'07.31', weekday:'금', time:'19:30', city:'서울', seat:'44구역 89번', status:'done' },
+  { n:2, date:'08.01', weekday:'토', time:'18:00', city:'서울', seat:'44구역 89번', status:'done' },
+  { n:3, date:'08.02', weekday:'일', time:'16:00', city:'서울', seat:'48구역 12번', status:'done' },
+  { n:4, date:'08.08', weekday:'토', time:'18:00', city:'대구', seat:'33구역 7번', status:'done' },
+  { n:5, date:'08.09', weekday:'일', time:'16:00', city:'대구', seat:'33구역 9번', status:'done' },
+  { n:6, date:'08.15', weekday:'금', time:'19:30', city:'부산', seat:'22구역 41번', status:'done' },
+  { n:7, date:'08.16', weekday:'토', time:'18:00', city:'부산', seat:'미정', status:'plan' },
+  { n:8, date:'08.22', weekday:'금', time:'19:30', city:'광주', seat:'미정', status:'plan' },
+  { n:9, date:'08.23', weekday:'토', time:'17:00', city:'광주', seat:'미정', status:'plan' },
+];
+
+const DEFAULT_SEATS = ['44구역 89번', '48구역'];
+
+const STATUS_CFG = {
+  none: {
+    label: '미관람', badge: '관람 체크', dot: 'var(--cyan)',
+    rowBg: 'rgba(255,255,255,.025)', rowBorder: 'rgba(143,233,240,.1)',
+    badgeBg: 'rgba(143,233,240,.12)', badgeColor: 'var(--cyan)',
+    tagBg: 'transparent', tagBorder: 'rgba(143,233,240,.22)', tagColor: 'var(--muted)',
+  },
+  plan: {
+    label: '예정', badge: '☆ 예정', dot: 'var(--amber)',
+    rowBg: 'rgba(242,180,138,.08)', rowBorder: 'rgba(242,180,138,.3)',
+    badgeBg: 'rgba(242,180,138,.16)', badgeColor: 'var(--amber-l)',
+    tagBg: 'rgba(242,180,138,.16)', tagBorder: 'transparent', tagColor: '#ffd9bd',
+  },
+  done: {
+    label: '관람', badge: '✓ 관람', dot: 'var(--cyan)',
+    rowBg: 'rgba(127,230,240,.09)', rowBorder: 'rgba(127,230,240,.32)',
+    badgeBg: 'rgba(127,230,240,.16)', badgeColor: 'var(--cyan-l)',
+    tagBg: 'rgba(127,230,240,.16)', tagBorder: 'transparent', tagColor: 'var(--cyan-l)',
+  },
+};
+const STATUS_ORDER = ['none','plan','done'];
+
+// ─── State ──────────────────────────────────────────────────────────────────
+let sessions = load('ncon5_sessions', DEFAULT_SESSIONS);
+let selectedSeats = load('ncon5_seats', DEFAULT_SEATS);
+let activeCity = load('ncon5_city', '서울');
+let currentView = 'home';
+
+function load(key, def) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; }
+  catch { return def; }
+}
+function save(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
+
+// ─── Hero starfield ───────────────────────────────────────────────────────
+function initHeroStars() {
+  const container = document.getElementById('heroStars');
+  if (!container) return;
+  container.innerHTML = '';
+  for (let i = 0; i < 28; i++) {
+    const s = document.createElement('div');
+    s.className = 'hero-star';
+    const size = Math.random() * 2 + 1;
+    s.style.cssText = `
+      width:${size}px;height:${size}px;
+      left:${Math.random()*100}%;top:${Math.random()*100}%;
+      opacity:${Math.random()*.4+.1};
+      --dur:${(Math.random()*2+1.5).toFixed(1)}s;
+      --delay:-${(Math.random()*3).toFixed(1)}s;
+    `;
+    container.appendChild(s);
+  }
+}
+
+// ─── SVG ────────────────────────────────────────────────────────────────────
+let svgContent = null;
+async function loadSVG() {
+  if (svgContent) return svgContent;
+  try {
+    const r = await fetch('partials/seoul_blueprint.svg');
+    svgContent = await r.text();
+  } catch {
+    svgContent = `<svg viewBox="0 0 340 270" xmlns="http://www.w3.org/2000/svg">
+      <rect width="340" height="270" fill="none"/>
+      <text x="170" y="140" text-anchor="middle" fill="rgba(127,230,240,.3)" font-size="12" font-family="sans-serif">SVG 로딩 실패</text>
+    </svg>`;
+  }
+  return svgContent;
+}
+
+function highlightSeats(svgStr, seats) {
+  if (!seats.length) return svgStr;
+  let s = svgStr;
+  seats.forEach((seat, idx) => {
+    const zone = seat.match(/(\d+)구역/);
+    if (!zone) return;
+    const z = zone[1];
+    const isFirst = idx === 0;
+    const glow = isFirst ? 'rgba(239,156,194,.9)' : 'rgba(185,167,230,.9)';
+    const stroke = isFirst ? '#ef9cc2' : '#b9a7e6';
+    s = s.replace(new RegExp(`(<[^>]*?\\b${z}\\b[^>]*?>)`, 'g'), (m) => {
+      if (m.includes('fill') && !m.includes('fill="none"')) {
+        return m.replace(/fill="[^"]*"/, `fill="${glow}"`).replace('>', ` stroke="${stroke}" stroke-width="1.5">`);
+      }
+      return m;
+    });
+    const textRx = new RegExp(`(<text[^>]*>\\s*${z}\\s*<\\/text>)`, 'g');
+    s = s.replace(textRx, (m) => m.replace(/fill="[^"]*"/, `fill="#06121a"`).replace('<text', `<text font-weight="bold"`));
+  });
+  return s;
+}
+
+// ─── Derived ────────────────────────────────────────────────────────────────
+function getDone() { return sessions.filter(s => s.status === 'done'); }
+function getPlan() { return sessions.filter(s => s.status === 'plan'); }
+function getRegionStats() {
+  return Object.entries(CITIES).map(([city, cfg]) => {
+    const done = sessions.filter(s => s.city === city && s.status === 'done').length;
+    return { city, color: cfg.color, done, possible: cfg.possible };
+  });
+}
+function getFavoriteZone() {
+  const counts = {};
+  sessions.forEach(s => {
+    const z = s.seat.match(/(\d+)구역/);
+    if (z) counts[z[1]] = (counts[z[1]] || 0) + 1;
+  });
+  const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
+  return top ? `${top[0]}구역` : '—';
+}
+function getTopCity() {
+  const regions = getRegionStats();
+  const top = regions.sort((a,b) => b.done - a.done)[0];
+  return top && top.done > 0 ? `${top.city} ${top.done}회` : '—';
+}
+
+// ─── Render Home ─────────────────────────────────────────────────────────────
+function renderHome() {
+  const done = getDone();
+  const plan = getPlan();
+  document.getElementById('heroDone').textContent = done.length;
+  document.getElementById('heroPlan').textContent = `예정 ${plan.length}회`;
+
+  const regions = getRegionStats();
+  const visitedRegions = regions.filter(r => r.done > 0).length;
+  document.getElementById('heroRegions').textContent = `${visitedRegions}곳`;
+
+  const doneDates = done.map(s => s.date);
+  document.getElementById('heroFirst').textContent = doneDates.length ? doneDates[0] : '—';
+  document.getElementById('heroLast').textContent = doneDates.length ? doneDates[doneDates.length-1] : '—';
+
+  const rp = document.getElementById('regionProgress');
+  rp.innerHTML = regions.map(r => `
+    <div class="region-row">
+      <div class="region-dot" style="background:${r.color}"></div>
+      <div class="region-name">${r.city}</div>
+      <div class="region-count">${r.done} / ${r.possible}회</div>
+      <div class="region-bar-wrap">
+        <div class="region-bar" style="width:${r.possible ? r.done/r.possible*100 : 0}%;background:${r.color}"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── Render History ──────────────────────────────────────────────────────────
+function renderHistory() {
+  const done = getDone().length;
+  const plan = getPlan().length;
+  document.getElementById('historyCounts').textContent = `${done} 관람 · ${plan} 예정`;
+
+  const list = document.getElementById('historyList');
+  list.innerHTML = sessions.map(s => {
+    const cfg = STATUS_CFG[s.status];
+    const city = CITIES[s.city];
+    return `
+    <div class="session-row" style="background:${cfg.rowBg};border-color:${cfg.rowBorder}">
+      <div class="session-accent" style="background:${city.color}"></div>
+      <div class="session-num">${s.n}</div>
+      <div class="session-info">
+        <div class="session-date">${s.date} (${s.weekday}) ${s.time}
+          <span class="session-city-tag" style="background:${cfg.tagBg};color:${cfg.tagColor};border:1px solid ${cfg.tagBorder}">${s.city}</span>
+        </div>
+        <div class="session-seat">${s.seat}</div>
+      </div>
+      <div class="session-badge" style="background:${cfg.badgeBg};color:${cfg.badgeColor}">${cfg.badge}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── Render Seat Chart ───────────────────────────────────────────────────────
+async function renderSeatChart() {
+  const frame = document.getElementById('seatSvgFrame');
+  const svg = await loadSVG();
+  frame.innerHTML = highlightSeats(svg, selectedSeats);
+
+  // Update venue info for active city
+  const cityData = CITIES[activeCity];
+  const sessionEl = document.getElementById('seoulSession');
+  const venueNameMob = document.getElementById('venueNameMob');
+  const venueSubMob = document.getElementById('venueSubMob');
+  const deskCityName = document.getElementById('deskCityName');
+  const deskVenueName = document.getElementById('deskVenueName');
+  const deskVenueMeta = document.getElementById('deskVenueMeta');
+  if (sessionEl) sessionEl.textContent = cityData.session;
+  if (venueNameMob) venueNameMob.textContent = cityData.venue;
+  if (venueSubMob) venueSubMob.textContent = cityData.sub;
+  if (deskCityName) deskCityName.textContent = activeCity;
+  if (deskVenueName) deskVenueName.textContent = cityData.venue;
+  if (deskVenueMeta) deskVenueMeta.textContent = cityData.meta;
+
+  const chips = document.getElementById('seatChips');
+  const CHIP_COLORS = [
+    { bg: 'rgba(239,156,194,.18)', color: 'var(--pink-l)', border: '1px solid rgba(239,156,194,.4)' },
+    { bg: 'rgba(185,167,230,.18)', color: 'var(--violet-l)', border: '1px solid rgba(185,167,230,.4)' },
+  ];
+  chips.innerHTML = selectedSeats.map((seat, i) => {
+    const c = CHIP_COLORS[i % CHIP_COLORS.length];
+    return `<div class="seat-chip" style="background:${c.bg};color:${c.color};border:${c.border}">
+      ${seat}
+      <button class="seat-chip-remove" onclick="removeSeat(${i})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+// ─── Render Schedule ─────────────────────────────────────────────────────────
+function renderSchedule() {
+  const done = sessions.filter(s => s.status === 'done').length;
+  document.getElementById('scheduleProgressLabel').textContent = `${done} / 9`;
+  document.getElementById('scheduleProgressFill').style.width = `${done/9*100}%`;
+
+  const list = document.getElementById('scheduleList');
+  const cityGroups = {};
+  sessions.forEach(s => { if (!cityGroups[s.city]) cityGroups[s.city] = []; cityGroups[s.city].push(s); });
+
+  list.innerHTML = Object.entries(cityGroups).map(([city, ss]) => `
+    <div class="city-group-header" style="color:${CITIES[city].color}">${city}</div>
+    ${ss.map(s => {
+      const cfg = STATUS_CFG[s.status];
+      return `<div class="schedule-row" onclick="cycleStatus(${s.n-1})" style="background:${cfg.rowBg};border-color:${cfg.rowBorder}">
+        <div class="schedule-num" style="color:${CITIES[s.city].color};background:${CITIES[s.city].color}18">${s.n}</div>
+        <div class="schedule-info">
+          <div class="schedule-date" style="color:${s.status==='none'?'var(--text2)':'var(--text)'}">${s.date} (${s.weekday})</div>
+          <div class="schedule-time">${s.time}${s.seat && s.seat !== '미정' ? ' · ' + s.seat : ''}</div>
+        </div>
+        <div class="schedule-badge" style="background:${cfg.badgeBg};color:${cfg.badgeColor}">${cfg.badge}</div>
+      </div>`;
+    }).join('')}
+  `).join('');
+}
+
+// ─── Render Settlement ───────────────────────────────────────────────────────
+function renderSettlement() {
+  const regions = getRegionStats();
+  const maxDone = Math.max(...regions.map(r => r.done), 1);
+  const fav = getFavoriteZone();
+  document.getElementById('settleZone').textContent = fav;
+
+  const bars = document.getElementById('settlementBars');
+  bars.innerHTML = regions.map(r => `
+    <div class="settlement-row">
+      <div class="settlement-city" style="color:${r.color}">${r.city}</div>
+      <div class="settlement-bar-wrap">
+        <div class="settlement-bar" style="width:${r.done/maxDone*100}%;background:${r.color}"></div>
+      </div>
+      <div class="settlement-count">${r.done}</div>
+    </div>
+  `).join('');
+
+  const doneSessions = getDone();
+  const summary = document.getElementById('settlementSummary');
+  summary.innerHTML = `
+    <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)"><span style="color:var(--text2)">총 관람</span><span style="font-weight:700;font-family:'Space Grotesk'">${doneSessions.length}회</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)"><span style="color:var(--text2)">투어 기간</span><span style="font-weight:700;font-family:'Space Grotesk'">24일</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)"><span style="color:var(--text2)">단골 구역</span><span style="font-weight:700;font-family:'Space Grotesk';color:var(--pink)">${fav}</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0"><span style="color:var(--text2)">최다 도시</span><span style="font-weight:700;font-family:'Space Grotesk'">${getTopCity()}</span></div>
+  `;
+}
+
+// ─── Render Desktop Right ─────────────────────────────────────────────────────
+function renderDesktopRight() {
+  const rl = document.getElementById('rightSessionList');
+  if (!rl) return;
+  const visible = sessions.filter(s => s.status !== 'none');
+  rl.innerHTML = visible.length ? visible.map(s => {
+    const cfg = STATUS_CFG[s.status];
+    return `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:${cfg.rowBg};border:1px solid ${cfg.rowBorder}">
+      <div style="width:6px;height:6px;border-radius:50%;background:${CITIES[s.city].color};flex-shrink:0"></div>
+      <div style="flex:1">
+        <div style="font-size:11px;font-weight:600">${s.n}회차 ${s.date} ${s.city}</div>
+        <div style="font-size:10px;color:var(--muted)">${s.seat}</div>
+      </div>
+      <div style="font-size:10px;font-weight:700;color:${cfg.badgeColor}">${cfg.badge}</div>
+    </div>`;
+  }).join('') : `<div style="font-size:11px;color:var(--muted);padding:12px 0">관람 예정 또는 완료 기록 없음</div>`;
+
+  const regions = getRegionStats();
+  const maxDone = Math.max(...regions.map(r => r.done), 1);
+  const rb = document.getElementById('rightSettlementBars');
+  rb.innerHTML = regions.map(r => `
+    <div class="settlement-row" style="padding:6px 0">
+      <div class="settlement-city" style="color:${r.color}">${r.city}</div>
+      <div class="settlement-bar-wrap"><div class="settlement-bar" style="width:${r.done/maxDone*100}%;background:${r.color}"></div></div>
+      <div class="settlement-count">${r.done}</div>
+    </div>
+  `).join('');
+}
+
+// ─── Render Sidebar ───────────────────────────────────────────────────────────
+function renderSidebar() {
+  const sc = document.getElementById('sidebarCities');
+  if (!sc) return;
+  const regions = getRegionStats();
+  sc.innerHTML = regions.map(r => `
+    <div class="sidebar-city-item" onclick="selectCity('${r.city}');switchView('seatchart',true)">
+      <div class="dot" style="background:${r.color}"></div>
+      <div class="sidebar-city-name">${r.city}</div>
+      <div class="sidebar-city-count">${r.possible}회</div>
+    </div>
+  `).join('');
+  const total = getDone().length;
+  const st = document.getElementById('sidebarTotal');
+  if (st) st.textContent = total;
+}
+
+// ─── Navigation ──────────────────────────────────────────────────────────────
+function switchView(view, fromDesktop = false) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  document.querySelectorAll('.sidebar-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+
+  const dr = document.getElementById('desktopRight');
+  if (dr) dr.classList.toggle('active', view === 'seatchart');
+
+  currentView = view;
+  renderCurrentView();
+}
+
+function renderCurrentView() {
+  switch(currentView) {
+    case 'home':        renderHome(); break;
+    case 'history':     renderHistory(); break;
+    case 'seatchart':   renderSeatChart(); renderDesktopRight(); renderSidebar(); break;
+    case 'schedule':    renderSchedule(); break;
+    case 'settlement':  renderSettlement(); break;
+  }
+}
+
+// ─── Actions ─────────────────────────────────────────────────────────────────
+function cycleStatus(idx) {
+  const s = sessions[idx];
+  const cur = STATUS_ORDER.indexOf(s.status);
+  s.status = STATUS_ORDER[(cur + 1) % STATUS_ORDER.length];
+  save('ncon5_sessions', sessions);
+  renderSchedule();
+  renderSidebar();
+}
+
+function selectCity(city) {
+  activeCity = city;
+  save('ncon5_city', city);
+  document.querySelectorAll('.city-tab').forEach(t => t.classList.toggle('active', t.dataset.city === city));
+  document.querySelectorAll('.desk-city-tab').forEach(t => t.classList.toggle('active', t.dataset.city === city));
+  renderSeatChart();
+}
+
+function addSeat() {
+  const input = document.getElementById('seatInput');
+  const val = input.value.trim();
+  if (!val) return;
+  if (selectedSeats.length >= 2) { selectedSeats.shift(); }
+  selectedSeats.push(val);
+  input.value = '';
+  save('ncon5_seats', selectedSeats);
+  renderSeatChart();
+}
+
+function removeSeat(idx) {
+  selectedSeats.splice(idx, 1);
+  save('ncon5_seats', selectedSeats);
+  renderSeatChart();
+}
+
+document.getElementById('seatInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') addSeat(); });
+
+// ─── Export ───────────────────────────────────────────────────────────────────
+async function exportSeatImage() {
+  const btn = document.getElementById('saveBtn');
+  const allBtns = document.querySelectorAll('.save-btn');
+  allBtns.forEach(b => { b.classList.add('saving'); });
+  if (btn) {
+    btn.querySelector('span').textContent = '…';
+    btn.childNodes[btn.childNodes.length-1].textContent = ' 저장 중…';
+  }
+
+  await document.fonts.ready;
+
+  const W = 760, H = 1180, DPR = 2;
+  const canvas = document.createElement('canvas');
+  canvas.width = W * DPR; canvas.height = H * DPR;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(DPR, DPR);
+
+  // BG
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#070b18'); bg.addColorStop(1, '#0a1020');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+  // Radial glow
+  const glow = ctx.createRadialGradient(W/2, 180, 0, W/2, 180, 420);
+  glow.addColorStop(0, 'rgba(127,230,240,.06)'); glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
+
+  // Stars
+  for (let i = 0; i < 80; i++) {
+    const x = Math.random()*W, y = Math.random()*H, r = Math.random()*1.2+.2;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(255,255,255,${Math.random()*.35+.05})`; ctx.fill();
+  }
+
+  // Top border accent
+  ctx.fillStyle = 'rgba(127,230,240,.15)';
+  ctx.fillRect(0, 0, W, 1);
+
+  // Header
+  ctx.fillStyle = '#7fe6f0';
+  ctx.font = '600 13px "Space Grotesk", sans-serif';
+  ctx.letterSpacing = '3px';
+  ctx.fillText('INTO REM', 44, 62);
+  ctx.letterSpacing = '0px';
+  ctx.fillStyle = '#9fb0cc'; ctx.textAlign = 'right';
+  ctx.font = '500 13px "Space Grotesk", sans-serif';
+  ctx.fillText('2026 N.Flying LIVE &CON5', W-44, 62);
+  ctx.textAlign = 'left';
+
+  // Thin separator
+  ctx.strokeStyle = 'rgba(143,233,240,.1)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(44, 78); ctx.lineTo(W-44, 78); ctx.stroke();
+
+  // City
+  ctx.fillStyle = '#eaf2ff';
+  ctx.font = '800 52px "Pretendard Variable", "Pretendard", sans-serif';
+  ctx.fillText(activeCity, 44, 148);
+
+  const cityData = CITIES[activeCity];
+  const cityColor = cityData?.color || '#7fe6f0';
+  ctx.fillStyle = cityColor;
+  ctx.font = '700 20px "Pretendard Variable", "Pretendard", sans-serif';
+  ctx.fillText(cityData?.venue || '', 44, 184);
+
+  ctx.fillStyle = '#9fb0cc';
+  ctx.font = '500 14px "Pretendard Variable", "Pretendard", sans-serif';
+  ctx.fillText(cityData?.meta || '', 44, 210);
+
+  // SVG image
+  const svg = await loadSVG();
+  const highlighted = highlightSeats(svg, selectedSeats);
+  const blob = new Blob([highlighted], {type:'image/svg+xml'});
+  const url = URL.createObjectURL(blob);
+  await new Promise(res => {
+    const img = new Image();
+    img.onload = () => {
+      const svgAR = 340/270;
+      const svgW = W - 88;
+      const svgH = svgW / svgAR;
+      const frameY = 234;
+      // Frame
+      ctx.save();
+      ctx.fillStyle = 'rgba(6,10,24,.85)';
+      roundRect(ctx, 44, frameY, svgW, svgH+24, 16); ctx.fill();
+      ctx.strokeStyle = 'rgba(127,230,240,.18)'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.drawImage(img, 54, frameY+12, svgW-20, svgH);
+      ctx.restore();
+      URL.revokeObjectURL(url);
+      res();
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); res(); };
+    img.src = url;
+  });
+
+  const svgDisplayH = (W-88)/340*270 + 24;
+  let y = 234 + svgDisplayH + 36;
+
+  // Seats label
+  ctx.fillStyle = '#6b7a96';
+  ctx.font = '600 12px "Pretendard Variable", "Pretendard", sans-serif';
+  ctx.fillText('내 좌석', 44, y); y += 22;
+
+  // Seat chips
+  const chipColors = [
+    {bg:'rgba(239,156,194,.22)',text:'#ffd7e8',border:'rgba(239,156,194,.5)'},
+    {bg:'rgba(185,167,230,.22)',text:'#e6dcff',border:'rgba(185,167,230,.5)'},
+  ];
+  let cx = 44;
+  selectedSeats.forEach((seat, i) => {
+    const cc = chipColors[i % chipColors.length];
+    ctx.font = '700 14px "Pretendard Variable", "Pretendard", sans-serif';
+    const tw = ctx.measureText(seat).width;
+    const cw = tw + 26; const ch = 28;
+    ctx.fillStyle = cc.bg;
+    roundRect(ctx, cx, y-18, cw, ch, 14); ctx.fill();
+    ctx.strokeStyle = cc.border; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = cc.text; ctx.fillText(seat, cx+13, y+2);
+    cx += cw + 10;
+  });
+
+  // Footer
+  y = H - 64;
+  ctx.strokeStyle = 'rgba(255,255,255,.05)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(44, y-16); ctx.lineTo(W-44, y-16); ctx.stroke();
+
+  ctx.fillStyle = 'rgba(127,230,240,.4)';
+  ctx.font = `italic 30px "Sacramento", cursive`;
+  ctx.fillText('into REM', 44, y+12);
+  ctx.fillStyle = '#5d6b85';
+  ctx.font = '500 11px "Pretendard Variable", "Pretendard", sans-serif';
+  ctx.fillText('나의 &CON5 좌석 기록', 44, y+30);
+
+  canvas.toBlob(blob2 => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob2);
+    a.download = `REM_${activeCity}_좌석.png`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    allBtns.forEach(b => {
+      b.classList.remove('saving'); b.classList.add('saved');
+    });
+    if (btn) {
+      btn.querySelector('span').textContent = '✓';
+      btn.childNodes[btn.childNodes.length-1].textContent = ' 저장 완료';
+    }
+    setTimeout(() => {
+      allBtns.forEach(b => b.classList.remove('saved'));
+      if (btn) {
+        btn.querySelector('span').textContent = '⤓';
+        btn.childNodes[btn.childNodes.length-1].textContent = ' 좌석 이미지로 저장';
+      }
+    }, 2500);
+  }, 'image/png');
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y); ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w, y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r, y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x, y+r); ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+}
+
+// ─── Desktop detection ────────────────────────────────────────────────────────
+function checkDesktop() {
+  const isDesktop = window.innerWidth >= 800;
+  const sidebar = document.getElementById('desktopSidebar');
+  const dr = document.getElementById('desktopRight');
+  const deskVH = document.getElementById('deskVenueHeader');
+  const mobileVH = document.getElementById('mobileVenueHeader');
+  const legend = document.getElementById('chartLegend');
+
+  if (sidebar) sidebar.style.display = isDesktop ? 'flex' : 'none';
+  if (deskVH) deskVH.style.display = isDesktop ? 'flex' : 'none';
+  if (mobileVH) mobileVH.style.display = isDesktop ? 'none' : 'block';
+  if (legend) legend.style.display = isDesktop ? 'flex' : 'none';
+
+  if (isDesktop) {
+    document.getElementById('app').style.maxWidth = '1180px';
+    if (currentView === 'seatchart' && dr) dr.classList.add('active');
+  } else {
+    document.getElementById('app').style.maxWidth = '430px';
+    if (dr) dr.classList.remove('active');
+  }
+}
+
+window.addEventListener('resize', () => { checkDesktop(); });
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+checkDesktop();
+initHeroStars();
+renderHome();
+renderSidebar();
+</script>
+</body>
+</html>
