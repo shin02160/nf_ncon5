@@ -126,8 +126,8 @@ body{height:100%;background:#05070f;color:#eaf2ff;font-family:'Pretendard Variab
 .venue-name{font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:space-between}
 .venue-session{font-size:11px;color:var(--cyan);font-family:'Space Grotesk',sans-serif}
 .venue-sub{font-size:11px;color:var(--text2);margin-top:3px}
-.svg-frame{background:rgba(6,10,24,.8);border:1px solid rgba(127,230,240,.12);border-radius:14px;padding:10px;margin-bottom:12px;overflow:hidden}
-.svg-frame svg{width:100%;height:auto;display:block}
+.svg-frame{background:rgba(6,10,24,.8);border:1px solid rgba(127,230,240,.12);border-radius:14px;padding:10px;margin-bottom:12px}
+.svg-frame svg{width:100%;height:auto;display:block;overflow:visible}
 .seat-label{font-size:11px;color:var(--text2);margin-bottom:6px}
 .seat-input-row{display:flex;gap:8px;margin-bottom:10px}
 .seat-input{flex:1;background:rgba(255,255,255,.04);border:1px dashed rgba(143,233,240,.25);border-radius:10px;padding:9px 12px;color:var(--text);font-size:12px;font-family:'Pretendard Variable','Pretendard',sans-serif;outline:none}
@@ -268,7 +268,10 @@ body{height:100%;background:#05070f;color:#eaf2ff;font-family:'Pretendard Variab
     <div class="view active" id="view-home">
       <div class="view-header">
         <div>
-          <div style="font-family:'Sacramento',cursive;font-size:22px;color:var(--cyan);line-height:1.1">into</div>
+          <div style="display:flex;align-items:baseline;gap:7px;margin-bottom:2px">
+            <span style="font-family:'Sacramento',cursive;font-size:22px;color:var(--cyan);line-height:1">into</span>
+            <span style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;letter-spacing:3px;-webkit-text-stroke:1.2px var(--cyan);color:transparent;line-height:1">REM</span>
+          </div>
           <div class="view-title">전체 현황</div>
         </div>
         <div class="view-sub">2026 LIVE &amp;CON5</div>
@@ -471,18 +474,18 @@ const CITIES = {
 };
 
 const DEFAULT_SESSIONS = [
-  { n:1, date:'07.31', weekday:'금', time:'19:30', city:'서울', seat:'44구역 89번', status:'done' },
-  { n:2, date:'08.01', weekday:'토', time:'18:00', city:'서울', seat:'44구역 89번', status:'done' },
-  { n:3, date:'08.02', weekday:'일', time:'16:00', city:'서울', seat:'48구역 12번', status:'done' },
-  { n:4, date:'08.08', weekday:'토', time:'18:00', city:'대구', seat:'33구역 7번', status:'done' },
-  { n:5, date:'08.09', weekday:'일', time:'16:00', city:'대구', seat:'33구역 9번', status:'done' },
-  { n:6, date:'08.15', weekday:'금', time:'19:30', city:'부산', seat:'22구역 41번', status:'done' },
-  { n:7, date:'08.16', weekday:'토', time:'18:00', city:'부산', seat:'미정', status:'plan' },
-  { n:8, date:'08.22', weekday:'금', time:'19:30', city:'광주', seat:'미정', status:'plan' },
-  { n:9, date:'08.23', weekday:'토', time:'17:00', city:'광주', seat:'미정', status:'plan' },
+  { n:1, date:'07.31', weekday:'금', time:'19:30', city:'서울', seat:'', status:'none' },
+  { n:2, date:'08.01', weekday:'토', time:'18:00', city:'서울', seat:'', status:'none' },
+  { n:3, date:'08.02', weekday:'일', time:'16:00', city:'서울', seat:'', status:'none' },
+  { n:4, date:'08.08', weekday:'토', time:'18:00', city:'대구', seat:'', status:'none' },
+  { n:5, date:'08.09', weekday:'일', time:'16:00', city:'대구', seat:'', status:'none' },
+  { n:6, date:'08.15', weekday:'금', time:'19:30', city:'부산', seat:'', status:'none' },
+  { n:7, date:'08.16', weekday:'토', time:'18:00', city:'부산', seat:'', status:'none' },
+  { n:8, date:'08.22', weekday:'금', time:'19:30', city:'광주', seat:'', status:'none' },
+  { n:9, date:'08.23', weekday:'토', time:'17:00', city:'광주', seat:'', status:'none' },
 ];
 
-const DEFAULT_SEATS = ['44구역 89번', '48구역'];
+const DEFAULT_SEATS = [];
 
 const STATUS_CFG = {
   none: {
@@ -507,6 +510,12 @@ const STATUS_CFG = {
 const STATUS_ORDER = ['none','plan','done'];
 
 // ─── State ──────────────────────────────────────────────────────────────────
+const DATA_VERSION = 'v2';
+if (localStorage.getItem('ncon5_ver') !== DATA_VERSION) {
+  ['ncon5_sessions','ncon5_seats','ncon5_city'].forEach(k => localStorage.removeItem(k));
+  localStorage.setItem('ncon5_ver', DATA_VERSION);
+}
+
 let sessions = load('ncon5_sessions', DEFAULT_SESSIONS);
 let selectedSeats = load('ncon5_seats', DEFAULT_SEATS);
 let activeCity = load('ncon5_city', '서울');
@@ -557,21 +566,27 @@ async function loadSVG() {
 function highlightSeats(svgStr, seats) {
   if (!seats.length) return svgStr;
   let s = svgStr;
+  const CHIP_FILLS = [
+    { fill: 'rgba(239,156,194,.85)', stroke: '#ef9cc2', glow: 'url(#bg)' },
+    { fill: 'rgba(185,167,230,.7)',  stroke: '#b9a7e6', glow: '' },
+  ];
   seats.forEach((seat, idx) => {
     const zone = seat.match(/(\d+)구역/);
     if (!zone) return;
     const z = zone[1];
-    const isFirst = idx === 0;
-    const glow = isFirst ? 'rgba(239,156,194,.9)' : 'rgba(185,167,230,.9)';
-    const stroke = isFirst ? '#ef9cc2' : '#b9a7e6';
-    s = s.replace(new RegExp(`(<[^>]*?\\b${z}\\b[^>]*?>)`, 'g'), (m) => {
-      if (m.includes('fill') && !m.includes('fill="none"')) {
-        return m.replace(/fill="[^"]*"/, `fill="${glow}"`).replace('>', ` stroke="${stroke}" stroke-width="1.5">`);
-      }
-      return m;
-    });
-    const textRx = new RegExp(`(<text[^>]*>\\s*${z}\\s*<\\/text>)`, 'g');
-    s = s.replace(textRx, (m) => m.replace(/fill="[^"]*"/, `fill="#06121a"`).replace('<text', `<text font-weight="bold"`));
+    const c = CHIP_FILLS[idx % CHIP_FILLS.length];
+    // highlight path by id
+    const pathRx = new RegExp(`(<path id="zone-${z}"[^>]*?)fill="[^"]*" fill-opacity="[^"]*" stroke="[^"]*" stroke-width="[^"]*"`);
+    const fillAttr = `fill="${c.fill}" fill-opacity="1" stroke="${c.stroke}" stroke-width="1.6"${c.glow ? ` filter="${c.glow}"` : ''}`;
+    s = s.replace(pathRx, `$1${fillAttr}`);
+    // brighten zone label text
+    const textRx = new RegExp(`(<text id="zone-text-${z}"[^>]*)fill="[^"]*"([^>]*font-size=")7\\.5"`);
+    s = s.replace(textRx, `$1fill="#eaf2ff"$2 9"`);
+    // fallback: match any text element containing exactly this zone number
+    s = s.replace(
+      new RegExp(`(<text(?:(?!id="zone-text-${z}")[^>])*>)\\s*${z}\\s*(<\\/text>)`),
+      (m, open, close) => open.replace(/fill="[^"]*"/, 'fill="#eaf2ff"').replace(/font-size="[^"]*"/, 'font-size="9"') + z + close
+    );
   });
   return s;
 }
@@ -919,10 +934,12 @@ async function exportSeatImage() {
   ctx.font = '500 14px "Pretendard Variable", "Pretendard", sans-serif';
   ctx.fillText(cityData?.meta || '', 44, 210);
 
-  // SVG image
+  // SVG image — set explicit px dimensions so <img> knows natural size
   const svg = await loadSVG();
-  const highlighted = highlightSeats(svg, selectedSeats);
-  const blob = new Blob([highlighted], {type:'image/svg+xml'});
+  const highlighted = highlightSeats(svg, selectedSeats)
+    .replace(/width="[^"]*"/, 'width="340"')
+    .replace(/<svg /, '<svg height="290" ');
+  const blob = new Blob([highlighted], {type:'image/svg+xml;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   await new Promise(res => {
     const img = new Image();
