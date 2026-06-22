@@ -128,16 +128,21 @@ body{height:100%;background:#05070f;color:#eaf2ff;font-family:'Pretendard Variab
 .venue-sub{font-size:11px;color:var(--text2);margin-top:3px}
 .svg-frame{background:rgba(6,10,24,.8);border:1px solid rgba(127,230,240,.12);border-radius:14px;padding:10px;margin-bottom:12px}
 .svg-frame svg{width:100%;height:auto;display:block;overflow:visible}
-.seat-label{font-size:11px;color:var(--text2);margin-bottom:6px}
-.seat-input-row{display:flex;gap:8px;margin-bottom:10px}
+.seat-input-row{display:flex;gap:8px;margin-top:6px}
 .seat-input{flex:1;background:rgba(255,255,255,.04);border:1px dashed rgba(143,233,240,.25);border-radius:10px;padding:9px 12px;color:var(--text);font-size:12px;font-family:'Pretendard Variable','Pretendard',sans-serif;outline:none}
 .seat-input::placeholder{color:var(--muted)}
 .seat-input:focus{border-color:rgba(143,233,240,.5);background:rgba(127,230,240,.04)}
-.seat-add-btn{background:rgba(127,230,240,.1);border:1px solid rgba(127,230,240,.2);border-radius:10px;padding:9px 12px;color:var(--cyan);font-size:18px;cursor:pointer;transition:.2s}
+.seat-add-btn{background:rgba(127,230,240,.1);border:1px solid rgba(127,230,240,.2);border-radius:10px;padding:9px 12px;color:var(--cyan);font-size:18px;cursor:pointer;transition:.2s;flex-shrink:0}
 .seat-add-btn:hover{background:rgba(127,230,240,.18)}
-.seat-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;min-height:28px}
+.seat-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .seat-chip{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}
 .seat-chip-remove{background:none;border:none;color:inherit;cursor:pointer;font-size:12px;opacity:.7;padding:0;line-height:1}
+.session-seat-block{padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.session-seat-block:last-child{border-bottom:none}
+.session-seat-header{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.session-seat-num{font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;color:var(--cyan)}
+.seat-section{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);padding:12px 14px;margin-bottom:12px}
+.seat-section-title{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:4px}
 .save-btn{width:100%;padding:13px;border-radius:12px;background:var(--cyan);color:#06121a;font-size:13px;font-weight:800;font-family:'Pretendard Variable','Pretendard',sans-serif;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s}
 .save-btn:hover{background:#a0eff8}
 .save-btn:active{scale:.97}
@@ -377,12 +382,10 @@ body{height:100%;background:#05070f;color:#eaf2ff;font-family:'Pretendard Variab
         <div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div><span style="color:var(--text2)">5회+</span></div>
       </div>
 
-      <div class="seat-label">내 좌석 · 최대 2</div>
-      <div class="seat-input-row">
-        <input class="seat-input" id="seatInput" type="text" placeholder="구역명 + 번호 입력 (예: 48구역 89번)">
-        <button class="seat-add-btn" onclick="addSeat()">＋</button>
+      <div class="seat-section">
+        <div class="seat-section-title">내 좌석 기록</div>
+        <div id="seatSection"></div>
       </div>
-      <div class="seat-chips" id="seatChips"></div>
       <button class="save-btn" id="saveBtn" onclick="exportSeatImage()">
         <span>⤓</span> 좌석 이미지로 저장
       </button>
@@ -474,18 +477,16 @@ const CITIES = {
 };
 
 const DEFAULT_SESSIONS = [
-  { n:1, date:'07.31', weekday:'금', time:'19:30', city:'서울', seat:'', status:'none' },
-  { n:2, date:'08.01', weekday:'토', time:'18:00', city:'서울', seat:'', status:'none' },
-  { n:3, date:'08.02', weekday:'일', time:'16:00', city:'서울', seat:'', status:'none' },
-  { n:4, date:'08.08', weekday:'토', time:'18:00', city:'대구', seat:'', status:'none' },
-  { n:5, date:'08.09', weekday:'일', time:'16:00', city:'대구', seat:'', status:'none' },
-  { n:6, date:'08.15', weekday:'금', time:'19:30', city:'부산', seat:'', status:'none' },
-  { n:7, date:'08.16', weekday:'토', time:'18:00', city:'부산', seat:'', status:'none' },
-  { n:8, date:'08.22', weekday:'금', time:'19:30', city:'광주', seat:'', status:'none' },
-  { n:9, date:'08.23', weekday:'토', time:'17:00', city:'광주', seat:'', status:'none' },
+  { n:1, date:'07.31', weekday:'금', time:'19:30', city:'서울', seats:[], status:'none' },
+  { n:2, date:'08.01', weekday:'토', time:'18:00', city:'서울', seats:[], status:'none' },
+  { n:3, date:'08.02', weekday:'일', time:'16:00', city:'서울', seats:[], status:'none' },
+  { n:4, date:'08.08', weekday:'토', time:'18:00', city:'대구', seats:[], status:'none' },
+  { n:5, date:'08.09', weekday:'일', time:'16:00', city:'대구', seats:[], status:'none' },
+  { n:6, date:'08.15', weekday:'금', time:'19:30', city:'부산', seats:[], status:'none' },
+  { n:7, date:'08.16', weekday:'토', time:'18:00', city:'부산', seats:[], status:'none' },
+  { n:8, date:'08.22', weekday:'금', time:'19:30', city:'광주', seats:[], status:'none' },
+  { n:9, date:'08.23', weekday:'토', time:'17:00', city:'광주', seats:[], status:'none' },
 ];
-
-const DEFAULT_SEATS = [];
 
 const STATUS_CFG = {
   none: {
@@ -510,14 +511,13 @@ const STATUS_CFG = {
 const STATUS_ORDER = ['none','plan','done'];
 
 // ─── State ──────────────────────────────────────────────────────────────────
-const DATA_VERSION = 'v2';
+const DATA_VERSION = 'v3';
 if (localStorage.getItem('ncon5_ver') !== DATA_VERSION) {
   ['ncon5_sessions','ncon5_seats','ncon5_city'].forEach(k => localStorage.removeItem(k));
   localStorage.setItem('ncon5_ver', DATA_VERSION);
 }
 
 let sessions = load('ncon5_sessions', DEFAULT_SESSIONS);
-let selectedSeats = load('ncon5_seats', DEFAULT_SEATS);
 let activeCity = load('ncon5_city', '서울');
 let currentView = 'home';
 
@@ -563,29 +563,32 @@ async function loadSVG() {
   return svgContent;
 }
 
-function highlightSeats(svgStr, seats) {
-  if (!seats.length) return svgStr;
+function highlightSeats(svgStr, allSeats) {
+  if (!allSeats || !allSeats.length) return svgStr;
+  // Count occurrences per zone number
+  const zoneCounts = {};
+  allSeats.forEach(seat => {
+    const m = seat.match(/(\d+)구역/);
+    if (m) zoneCounts[m[1]] = (zoneCounts[m[1]] || 0) + 1;
+  });
   let s = svgStr;
-  const CHIP_FILLS = [
-    { fill: 'rgba(239,156,194,.85)', stroke: '#ef9cc2', glow: 'url(#bg)' },
-    { fill: 'rgba(185,167,230,.7)',  stroke: '#b9a7e6', glow: '' },
-  ];
-  seats.forEach((seat, idx) => {
-    const zone = seat.match(/(\d+)구역/);
-    if (!zone) return;
-    const z = zone[1];
-    const c = CHIP_FILLS[idx % CHIP_FILLS.length];
-    // highlight path by id
-    const pathRx = new RegExp(`(<path id="zone-${z}"[^>]*?)fill="[^"]*" fill-opacity="[^"]*" stroke="[^"]*" stroke-width="[^"]*"`);
-    const fillAttr = `fill="${c.fill}" fill-opacity="1" stroke="${c.stroke}" stroke-width="1.6"${c.glow ? ` filter="${c.glow}"` : ''}`;
-    s = s.replace(pathRx, `$1${fillAttr}`);
-    // brighten zone label text
-    const textRx = new RegExp(`(<text id="zone-text-${z}"[^>]*)fill="[^"]*"([^>]*font-size=")7\\.5"`);
-    s = s.replace(textRx, `$1fill="#eaf2ff"$2 9"`);
-    // fallback: match any text element containing exactly this zone number
+  Object.entries(zoneCounts).forEach(([zone, count]) => {
+    let fill, stroke, strokeW, filterAttr = '';
+    if (count >= 5) {
+      fill = '#ef9cc2'; stroke = '#ef9cc2'; strokeW = '1.6';
+      filterAttr = ' filter="url(#glow)"';
+    } else if (count >= 3) {
+      fill = 'rgba(127,230,240,0.7)'; stroke = '#7fe6f0'; strokeW = '1.4';
+    } else {
+      fill = 'rgba(127,230,240,0.35)'; stroke = '#7fe6f0'; strokeW = '1.2';
+    }
     s = s.replace(
-      new RegExp(`(<text(?:(?!id="zone-text-${z}")[^>])*>)\\s*${z}\\s*(<\\/text>)`),
-      (m, open, close) => open.replace(/fill="[^"]*"/, 'fill="#eaf2ff"').replace(/font-size="[^"]*"/, 'font-size="9"') + z + close
+      new RegExp(`(<path id="zone-${zone}"[^>]*?)fill="[^"]*" fill-opacity="[^"]*" stroke="[^"]*" stroke-width="[^"]*"([^>]*)>`),
+      `$1fill="${fill}" fill-opacity="1" stroke="${stroke}" stroke-width="${strokeW}"$2${filterAttr}>`
+    );
+    s = s.replace(
+      new RegExp(`(<text id="zone-text-${zone}"[^>]*)fill="[^"]*"`),
+      `$1fill="#ffffff"`
     );
   });
   return s;
@@ -603,8 +606,10 @@ function getRegionStats() {
 function getFavoriteZone() {
   const counts = {};
   sessions.forEach(s => {
-    const z = s.seat.match(/(\d+)구역/);
-    if (z) counts[z[1]] = (counts[z[1]] || 0) + 1;
+    (s.seats || []).forEach(seat => {
+      const z = seat.match(/(\d+)구역/);
+      if (z) counts[z[1]] = (counts[z[1]] || 0) + 1;
+    });
   });
   const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
   return top ? `${top[0]}구역` : '—';
@@ -661,7 +666,7 @@ function renderHistory() {
         <div class="session-date">${s.date} (${s.weekday}) ${s.time}
           <span class="session-city-tag" style="background:${cfg.tagBg};color:${cfg.tagColor};border:1px solid ${cfg.tagBorder}">${s.city}</span>
         </div>
-        <div class="session-seat">${s.seat}</div>
+        <div class="session-seat">${(s.seats||[]).join(' · ')}</div>
       </div>
       <div class="session-badge" style="background:${cfg.badgeBg};color:${cfg.badgeColor}">${cfg.badge}</div>
     </div>`;
@@ -672,9 +677,12 @@ function renderHistory() {
 async function renderSeatChart() {
   const frame = document.getElementById('seatSvgFrame');
   const svg = await loadSVG();
-  frame.innerHTML = highlightSeats(svg, selectedSeats);
 
-  // Update venue info for active city
+  const citySessions = sessions.filter(s => s.city === activeCity);
+  const allCitySeats = citySessions.flatMap(s => s.seats || []);
+  frame.innerHTML = highlightSeats(svg, allCitySeats);
+
+  // Update venue info
   const cityData = CITIES[activeCity];
   const sessionEl = document.getElementById('seoulSession');
   const venueNameMob = document.getElementById('venueNameMob');
@@ -689,18 +697,36 @@ async function renderSeatChart() {
   if (deskVenueName) deskVenueName.textContent = cityData.venue;
   if (deskVenueMeta) deskVenueMeta.textContent = cityData.meta;
 
-  const chips = document.getElementById('seatChips');
+  // Per-session seat input
   const CHIP_COLORS = [
-    { bg: 'rgba(239,156,194,.18)', color: 'var(--pink-l)', border: '1px solid rgba(239,156,194,.4)' },
-    { bg: 'rgba(185,167,230,.18)', color: 'var(--violet-l)', border: '1px solid rgba(185,167,230,.4)' },
+    { bg:'rgba(239,156,194,.18)', color:'var(--pink-l)', border:'1px solid rgba(239,156,194,.4)' },
+    { bg:'rgba(185,167,230,.18)', color:'var(--violet-l)', border:'1px solid rgba(185,167,230,.4)' },
   ];
-  chips.innerHTML = selectedSeats.map((seat, i) => {
-    const c = CHIP_COLORS[i % CHIP_COLORS.length];
-    return `<div class="seat-chip" style="background:${c.bg};color:${c.color};border:${c.border}">
-      ${seat}
-      <button class="seat-chip-remove" onclick="removeSeat(${i})">✕</button>
-    </div>`;
-  }).join('');
+  const seatSection = document.getElementById('seatSection');
+  if (seatSection) {
+    seatSection.innerHTML = citySessions.map(s => {
+      const chips = (s.seats || []).map((seat, i) => {
+        const c = CHIP_COLORS[i % CHIP_COLORS.length];
+        return `<div class="seat-chip" style="background:${c.bg};color:${c.color};border:${c.border}">
+          ${seat}<button class="seat-chip-remove" onclick="removeSeat(${s.n},${i})">✕</button>
+        </div>`;
+      }).join('');
+      const cityColor = CITIES[s.city]?.color || 'var(--cyan)';
+      return `<div class="session-seat-block">
+        <div class="session-seat-header">
+          <span class="session-seat-num" style="color:${cityColor}">${s.n}회차</span>
+          <span>${s.date} (${s.weekday}) ${s.time}</span>
+        </div>
+        ${chips ? `<div class="seat-chips">${chips}</div>` : ''}
+        <div class="seat-input-row">
+          <input class="seat-input" id="seat-input-${s.n}" type="text"
+            placeholder="구역명 + 번호 입력 (예: 48구역 89번)"
+            onkeydown="if(event.key==='Enter')addSeat(${s.n})">
+          <button class="seat-add-btn" onclick="addSeat(${s.n})">＋</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
 }
 
 // ─── Render Schedule ─────────────────────────────────────────────────────────
@@ -721,7 +747,7 @@ function renderSchedule() {
         <div class="schedule-num" style="color:${CITIES[s.city].color};background:${CITIES[s.city].color}18">${s.n}</div>
         <div class="schedule-info">
           <div class="schedule-date" style="color:${s.status==='none'?'var(--text2)':'var(--text)'}">${s.date} (${s.weekday})</div>
-          <div class="schedule-time">${s.time}${s.seat && s.seat !== '미정' ? ' · ' + s.seat : ''}</div>
+          <div class="schedule-time">${s.time}${s.seats&&s.seats.length ? ' · ' + s.seats[0] : ''}</div>
         </div>
         <div class="schedule-badge" style="background:${cfg.badgeBg};color:${cfg.badgeColor}">${cfg.badge}</div>
       </div>`;
@@ -768,7 +794,7 @@ function renderDesktopRight() {
       <div style="width:6px;height:6px;border-radius:50%;background:${CITIES[s.city].color};flex-shrink:0"></div>
       <div style="flex:1">
         <div style="font-size:11px;font-weight:600">${s.n}회차 ${s.date} ${s.city}</div>
-        <div style="font-size:10px;color:var(--muted)">${s.seat}</div>
+        <div style="font-size:10px;color:var(--muted)">${(s.seats||[]).join(' · ')}</div>
       </div>
       <div style="font-size:10px;font-weight:700;color:${cfg.badgeColor}">${cfg.badge}</div>
     </div>`;
@@ -846,24 +872,28 @@ function selectCity(city) {
   renderSeatChart();
 }
 
-function addSeat() {
-  const input = document.getElementById('seatInput');
+function addSeat(sessionN) {
+  const input = document.getElementById(`seat-input-${sessionN}`);
+  if (!input) return;
   const val = input.value.trim();
   if (!val) return;
-  if (selectedSeats.length >= 2) { selectedSeats.shift(); }
-  selectedSeats.push(val);
+  const idx = sessions.findIndex(s => s.n === sessionN);
+  if (idx < 0) return;
+  if (!Array.isArray(sessions[idx].seats)) sessions[idx].seats = [];
+  sessions[idx].seats.push(val);
   input.value = '';
-  save('ncon5_seats', selectedSeats);
+  save('ncon5_sessions', sessions);
   renderSeatChart();
 }
 
-function removeSeat(idx) {
-  selectedSeats.splice(idx, 1);
-  save('ncon5_seats', selectedSeats);
+function removeSeat(sessionN, chipIdx) {
+  const idx = sessions.findIndex(s => s.n === sessionN);
+  if (idx < 0) return;
+  if (!Array.isArray(sessions[idx].seats)) return;
+  sessions[idx].seats.splice(chipIdx, 1);
+  save('ncon5_sessions', sessions);
   renderSeatChart();
 }
-
-document.getElementById('seatInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') addSeat(); });
 
 // ─── Export ───────────────────────────────────────────────────────────────────
 async function exportSeatImage() {
@@ -934,21 +964,24 @@ async function exportSeatImage() {
   ctx.font = '500 14px "Pretendard Variable", "Pretendard", sans-serif';
   ctx.fillText(cityData?.meta || '', 44, 210);
 
+  // Aggregate all seats for active city
+  const citySessions = sessions.filter(s => s.city === activeCity);
+  const allCitySeats = citySessions.flatMap(s => s.seats || []);
+
   // SVG image — set explicit px dimensions so <img> knows natural size
   const svg = await loadSVG();
-  const highlighted = highlightSeats(svg, selectedSeats)
-    .replace(/width="[^"]*"/, 'width="340"')
-    .replace(/<svg /, '<svg height="290" ');
+  const highlighted = highlightSeats(svg, allCitySeats)
+    .replace(/width="[^"]*"/, 'width="360"')
+    .replace(/<svg /, '<svg height="300" ');
   const blob = new Blob([highlighted], {type:'image/svg+xml;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   await new Promise(res => {
     const img = new Image();
     img.onload = () => {
-      const svgAR = 340/270;
+      const svgAR = 360/300;
       const svgW = W - 88;
       const svgH = svgW / svgAR;
       const frameY = 234;
-      // Frame
       ctx.save();
       ctx.fillStyle = 'rgba(6,10,24,.85)';
       roundRect(ctx, 44, frameY, svgW, svgH+24, 16); ctx.fill();
@@ -962,7 +995,7 @@ async function exportSeatImage() {
     img.src = url;
   });
 
-  const svgDisplayH = (W-88)/340*270 + 24;
+  const svgDisplayH = (W-88)/360*300 + 24;
   let y = 234 + svgDisplayH + 36;
 
   // Seats label
@@ -970,17 +1003,19 @@ async function exportSeatImage() {
   ctx.font = '600 12px "Pretendard Variable", "Pretendard", sans-serif';
   ctx.fillText('내 좌석', 44, y); y += 22;
 
-  // Seat chips
+  // Seat chips (unique seats)
   const chipColors = [
     {bg:'rgba(239,156,194,.22)',text:'#ffd7e8',border:'rgba(239,156,194,.5)'},
     {bg:'rgba(185,167,230,.22)',text:'#e6dcff',border:'rgba(185,167,230,.5)'},
   ];
+  const uniqueSeats = [...new Set(allCitySeats)];
   let cx = 44;
-  selectedSeats.forEach((seat, i) => {
+  uniqueSeats.forEach((seat, i) => {
     const cc = chipColors[i % chipColors.length];
     ctx.font = '700 14px "Pretendard Variable", "Pretendard", sans-serif';
     const tw = ctx.measureText(seat).width;
     const cw = tw + 26; const ch = 28;
+    if (cx + cw > W - 44) { cx = 44; y += 38; }
     ctx.fillStyle = cc.bg;
     roundRect(ctx, cx, y-18, cw, ch, 14); ctx.fill();
     ctx.strokeStyle = cc.border; ctx.lineWidth = 1; ctx.stroke();
