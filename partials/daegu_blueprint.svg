@@ -1,0 +1,59 @@
+<svg viewBox="0 0 360 300" width="100%" style="display:block"><defs><filter id="glowD" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.4" result="b"></feGaussianBlur><feMerge><feMergeNode in="b"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge></filter></defs>
+
+
+<path d="M100 12 L260 12 L260 36 L188 36 L188 58 L172 58 L172 36 L100 36 Z" fill="rgba(127,230,240,0.07)" stroke="rgba(127,230,240,0.45)" stroke-width="1.1" stroke-linejoin="round"></path>
+<text x="180" y="28.5" text-anchor="middle" font-size="9" letter-spacing="3" fill="#aef6fb" font-family="&#39;Space Grotesk&#39;,sans-serif" font-weight="700">STAGE</text>
+
+
+<rect x="305" y="33" width="17" height="5" rx="1.5" fill="#86e3b4" fill-opacity="0.9" stroke="#86e3b4" stroke-width="0.6" filter="url(#glowD)"></rect>
+
+
+<path d="M36 92 L36 58 L60 44 L84 44 L84 92 Z" fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1.1" stroke-linejoin="round"></path>
+<text x="60" y="73" text-anchor="middle" font-size="12" font-weight="700" fill="#f2c9a8" font-family="&#39;Space Grotesk&#39;,sans-serif">1</text>
+<rect x="94" y="44" width="72" height="48" rx="3" fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1.1"></rect>
+<text x="130" y="73" text-anchor="middle" font-size="12" font-weight="700" fill="#f2c9a8" font-family="&#39;Space Grotesk&#39;,sans-serif">2</text>
+<rect x="194" y="44" width="72" height="48" rx="3" fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1.1"></rect>
+<text x="230" y="73" text-anchor="middle" font-size="12" font-weight="700" fill="#f2c9a8" font-family="&#39;Space Grotesk&#39;,sans-serif">3</text>
+<path d="M276 92 L276 44 L300 44 L324 58 L324 92 Z" fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1.1" stroke-linejoin="round"></path>
+<text x="300" y="73" text-anchor="middle" font-size="12" font-weight="700" fill="#f2c9a8" font-family="&#39;Space Grotesk&#39;,sans-serif">4</text>
+
+
+<rect x="120" y="101" width="120" height="16" rx="2.5" fill="rgba(143,233,240,0.04)" stroke="rgba(143,233,240,0.28)" stroke-width="1"></rect>
+<text x="180" y="112.5" text-anchor="middle" font-size="7" letter-spacing="1.5" fill="#7d8ba6" font-family="&#39;Space Grotesk&#39;,sans-serif" font-weight="700">F.O.H</text>
+
+
+<rect x="30" y="126" width="54" height="66" rx="3" fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1.1"></rect>
+<text x="57" y="164" text-anchor="middle" font-size="14" font-weight="700" fill="#f2c9a8" font-family="&#39;Pretendard&#39;,sans-serif">가</text>
+
+<rect x="92" y="123" width="54" height="5" rx="1.5" fill="rgba(165,176,196,0.28)"></rect>
+<rect x="92" y="126" width="54" height="66" rx="3" fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1.1"></rect>
+<text x="119" y="164" text-anchor="middle" font-size="14" font-weight="700" fill="#f2c9a8" font-family="&#39;Pretendard&#39;,sans-serif">나</text>
+
+<rect x="154" y="123" width="54" height="5" rx="1.5" fill="rgba(165,176,196,0.28)"></rect>
+<rect x="154" y="126" width="54" height="66" rx="3" fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1.1"></rect>
+<text x="181" y="164" text-anchor="middle" font-size="14" font-weight="700" fill="#f2c9a8" font-family="&#39;Pretendard&#39;,sans-serif">다</text>
+
+<rect x="216" y="123" width="54" height="5" rx="1.5" fill="rgba(165,176,196,0.28)"></rect>
+<rect x="216" y="126" width="54" height="66" rx="3" fill="#b9a7e6" fill-opacity="0.82" stroke="#b9a7e6" stroke-width="1.6" filter="url(#glowD)"></rect>
+<text x="243" y="164" text-anchor="middle" font-size="14" font-weight="700" fill="#ffffff" font-family="&#39;Pretendard&#39;,sans-serif">라</text>
+
+<rect x="278" y="126" width="54" height="66" rx="3" fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1.1"></rect>
+<text x="305" y="164" text-anchor="middle" font-size="14" font-weight="700" fill="#f2c9a8" font-family="&#39;Pretendard&#39;,sans-serif">마</text>
+
+
+<rect x="30" y="202" width="54" height="66" rx="3" fill="rgba(127,230,240,0.06)" stroke="rgba(127,230,240,0.42)" stroke-width="1.1"></rect>
+<text x="57" y="240" text-anchor="middle" font-size="14" font-weight="700" fill="#9fd9e6" font-family="&#39;Pretendard&#39;,sans-serif">바</text>
+
+<rect x="92" y="202" width="54" height="66" rx="3" fill="rgba(127,230,240,0.06)" stroke="rgba(127,230,240,0.42)" stroke-width="1.1"></rect>
+<text x="119" y="240" text-anchor="middle" font-size="14" font-weight="700" fill="#9fd9e6" font-family="&#39;Pretendard&#39;,sans-serif">사</text>
+
+<rect x="154" y="202" width="54" height="66" rx="3" fill="rgba(127,230,240,0.06)" stroke="rgba(127,230,240,0.42)" stroke-width="1.1"></rect>
+<rect x="154" y="263" width="54" height="5" rx="1.5" fill="rgba(165,176,196,0.28)"></rect>
+<text x="181" y="238" text-anchor="middle" font-size="14" font-weight="700" fill="#9fd9e6" font-family="&#39;Pretendard&#39;,sans-serif">아</text>
+
+<rect x="216" y="202" width="54" height="66" rx="3" fill="rgba(127,230,240,0.06)" stroke="rgba(127,230,240,0.42)" stroke-width="1.1"></rect>
+<text x="243" y="240" text-anchor="middle" font-size="14" font-weight="700" fill="#9fd9e6" font-family="&#39;Pretendard&#39;,sans-serif">자</text>
+
+<rect x="278" y="202" width="54" height="66" rx="3" fill="rgba(127,230,240,0.06)" stroke="rgba(127,230,240,0.42)" stroke-width="1.1"></rect>
+<text x="305" y="240" text-anchor="middle" font-size="14" font-weight="700" fill="#9fd9e6" font-family="&#39;Pretendard&#39;,sans-serif">차</text>
+</svg>

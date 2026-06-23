@@ -376,10 +376,12 @@ body{height:100%;background:#05070f;color:#eaf2ff;font-family:'Pretendard Variab
 
       <!-- Legend (desktop only) -->
       <div class="chart-legend" id="chartLegend" style="display:none">
-        <span class="chart-legend-label">관람 횟수</span>
-        <div class="legend-item"><div class="legend-dot" style="background:rgba(127,230,240,.4)"></div><span style="color:var(--text2)">1회</span></div>
-        <div class="legend-item"><div class="legend-dot" style="background:rgba(127,230,240,.7)"></div><span style="color:var(--text2)">3회</span></div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div><span style="color:var(--text2)">5회+</span></div>
+        <span class="chart-legend-label" id="legendLabel">관람 횟수</span>
+        <div id="legendItems" style="display:contents">
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(127,230,240,.4)"></div><span style="color:var(--text2)">1회</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(127,230,240,.7)"></div><span style="color:var(--text2)">3회</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div><span style="color:var(--text2)">5회+</span></div>
+        </div>
       </div>
 
       <div class="seat-section">
@@ -470,10 +472,10 @@ body{height:100%;background:#05070f;color:#eaf2ff;font-family:'Pretendard Variab
 <script>
 // ─── Data ───────────────────────────────────────────────────────────────────
 const CITIES = {
-  서울: { color: '#7fe6f0', possible: 3, venue: '티켓링크 라이브 아레나', meta: '2026.07.31 – 08.02 · Standing A/B/C + 2F 37–50구역', session: '3회차', sub: 'Standing A/B/C · 2F 37–50' },
-  대구: { color: '#b9a7e6', possible: 2, venue: 'EXCO 오디토리움', meta: '2026.08.08 – 08.09 · Standing A/B/C', session: '2회차', sub: 'Standing A/B/C' },
-  부산: { color: '#f2b48a', possible: 2, venue: 'BEXCO 오디토리움', meta: '2026.08.15 – 08.16 · Standing A/B/C', session: '2회차', sub: 'Standing A/B/C' },
-  광주: { color: '#86e3b4', possible: 2, venue: 'GWN컨벤션센터', meta: '2026.08.22 – 08.23 · Standing A/B/C', session: '2회차', sub: 'Standing A/B/C' },
+  서울: { color: '#7fe6f0', possible: 3, venue: '티켓링크 라이브 아레나', meta: '2026.07.31 – 08.02 · Standing A/B/C + 2F 37–50구역', session: '3회차', sub: 'Standing A/B/C · 2F 37–50', svgFile: 'seoul_blueprint.svg' },
+  대구: { color: '#b9a7e6', possible: 2, venue: 'EXCO 5F 컨벤션홀', meta: '2026.08.08 – 08.09 · R석 1–4·가–마 / S석 바–차', session: '2회차', sub: 'R석 1–4 · 가–마 / S석 바–차', svgFile: 'daegu_blueprint.svg' },
+  부산: { color: '#f2b48a', possible: 2, venue: 'BEXCO 오디토리움', meta: '2026.08.15 – 08.16 · 1층 R석 A–E / 2층 S석 F–G', session: '2회차', sub: '1층 R석 A–E · 2층 S석 F–G', svgFile: 'busan_blueprint.svg' },
+  광주: { color: '#86e3b4', possible: 2, venue: '염주 종합체육관', meta: '2026.08.22 – 08.23 · 1F 가–아 / 2F·3F 스탠드', session: '2회차', sub: '1F 가–아 · 2F/3F 스탠드 좌우', svgFile: 'gwangju_blueprint.svg' },
 };
 
 const DEFAULT_SESSIONS = [
@@ -548,48 +550,111 @@ function initHeroStars() {
 }
 
 // ─── SVG ────────────────────────────────────────────────────────────────────
-let svgContent = null;
-async function loadSVG() {
-  if (svgContent) return svgContent;
+const svgCache = {};
+function normalizeSvg(svgStr) {
+  // Strip design-preview sample highlights so only user-entered seats get highlighted
+  return svgStr
+    .replace(/fill="#ef9cc2" fill-opacity="0\.82" stroke="#ef9cc2" stroke-width="1\.6" filter="url\(#glow[A-Z]*\)"/g,
+             'fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1.1"')
+    .replace(/fill="#b9a7e6" fill-opacity="0\.82" stroke="#b9a7e6" stroke-width="1\.6" filter="url\(#glow[A-Z]*\)"/g,
+             'fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1.1"');
+}
+
+async function loadSVG(city) {
+  const file = CITIES[city]?.svgFile || 'seoul_blueprint.svg';
+  if (svgCache[file]) return svgCache[file];
   try {
-    const r = await fetch('partials/seoul_blueprint.svg');
-    svgContent = await r.text();
+    const r = await fetch(`partials/${file}`);
+    svgCache[file] = normalizeSvg(await r.text());
   } catch {
-    svgContent = `<svg viewBox="0 0 340 270" xmlns="http://www.w3.org/2000/svg">
+    svgCache[file] = `<svg viewBox="0 0 340 270" xmlns="http://www.w3.org/2000/svg">
       <rect width="340" height="270" fill="none"/>
       <text x="170" y="140" text-anchor="middle" fill="rgba(127,230,240,.3)" font-size="12" font-family="sans-serif">SVG 로딩 실패</text>
     </svg>`;
   }
-  return svgContent;
+  return svgCache[file];
 }
 
-function highlightSeats(svgStr, allSeats) {
+function highlightSeats(svgStr, allSeats, city) {
   if (!allSeats || !allSeats.length) return svgStr;
-  // Count occurrences per zone number
+
+  // Parse zone label from seat string depending on city
+  function parseZone(seat) {
+    if (city === '서울') {
+      const m = seat.match(/(\d+)구역/);
+      return m ? m[1] : null;
+    }
+    if (city === '대구') {
+      // e.g. "라구역 12번" or "1구역", "2구역" for numbered zones
+      const m = seat.match(/^([가나다라마바사아자차])구역/) || seat.match(/^([1-4])구역/);
+      return m ? m[1] : null;
+    }
+    if (city === '부산') {
+      // e.g. "C구역 15번" → zone C
+      const m = seat.match(/^([A-Ga-g])구역/);
+      return m ? m[1].toUpperCase() : null;
+    }
+    if (city === '광주') {
+      // e.g. "나구역 08번" or "3-X구역"
+      const m = seat.match(/^([가나다라마바사아])구역/) || seat.match(/^(2-[A-Z가-힣]+|3-[A-Z가-힣]+|R-\d+)구역/);
+      return m ? m[1] : null;
+    }
+    const m = seat.match(/(\d+)구역/);
+    return m ? m[1] : null;
+  }
+
   const zoneCounts = {};
   allSeats.forEach(seat => {
-    const m = seat.match(/(\d+)구역/);
-    if (m) zoneCounts[m[1]] = (zoneCounts[m[1]] || 0) + 1;
+    const z = parseZone(seat);
+    if (z) zoneCounts[z] = (zoneCounts[z] || 0) + 1;
   });
+
+  // Determine glow filter id based on city
+  const glowId = city === '대구' ? 'glowD' : city === '부산' ? 'glowB' : city === '광주' ? 'glowG' : 'glow';
+
   let s = svgStr;
   Object.entries(zoneCounts).forEach(([zone, count]) => {
     let fill, stroke, strokeW, filterAttr = '';
     if (count >= 5) {
       fill = '#ef9cc2'; stroke = '#ef9cc2'; strokeW = '1.6';
-      filterAttr = ' filter="url(#glow)"';
+      filterAttr = ` filter="url(#${glowId})"`;
     } else if (count >= 3) {
       fill = 'rgba(127,230,240,0.7)'; stroke = '#7fe6f0'; strokeW = '1.4';
     } else {
       fill = 'rgba(127,230,240,0.35)'; stroke = '#7fe6f0'; strokeW = '1.2';
     }
-    s = s.replace(
-      new RegExp(`(<path id="zone-${zone}"[^>]*?)fill="[^"]*" fill-opacity="[^"]*" stroke="[^"]*" stroke-width="[^"]*"([^>]*)>`),
-      `$1fill="${fill}" fill-opacity="1" stroke="${stroke}" stroke-width="${strokeW}"$2${filterAttr}>`
-    );
-    s = s.replace(
-      new RegExp(`(<text id="zone-text-${zone}"[^>]*)fill="[^"]*"`),
-      `$1fill="#ffffff"`
-    );
+
+    if (city === '서울') {
+      // Seoul uses id="zone-N" paths
+      s = s.replace(
+        new RegExp(`(<path id="zone-${zone}"[^>]*?)fill="[^"]*" fill-opacity="[^"]*" stroke="[^"]*" stroke-width="[^"]*"([^>]*)>`),
+        `$1fill="${fill}" fill-opacity="1" stroke="${stroke}" stroke-width="${strokeW}"$2${filterAttr}>`
+      );
+      s = s.replace(
+        new RegExp(`(<text id="zone-text-${zone}"[^>]*)fill="[^"]*"`),
+        `$1fill="#ffffff"`
+      );
+    } else {
+      // Non-Seoul: rect/path and text are siblings.
+      // Match <rect or path with rgba fill> immediately followed by <text>ZONE</text>
+      const escaped = zone.replace(/[-.*+?^${}()|[\]\\]/g, '\\$&');
+      s = s.replace(
+        new RegExp(
+          `(<(?:rect|path)[^>]*stroke="rgba\\([^>]*>)(\\s*<text[^>]*>\\s*${escaped}\\s*</text>)`,
+          'g'
+        ),
+        (match, elemPart, textPart) => {
+          const newElem = elemPart
+            .replace(/fill="rgba\([^"]*\)"/, `fill="${fill}"`)
+            .replace(/fill-opacity="[^"]*"\s*/g, '')
+            .replace(/stroke="rgba\([^"]*\)"/, `stroke="${stroke}"`)
+            .replace(/stroke-width="[^"]*"/, `stroke-width="${strokeW}"`)
+            .replace(/\s*filter="[^"]*"/, '')
+            .replace(/>$/, `${filterAttr}>`);
+          return newElem + textPart;
+        }
+      );
+    }
   });
   return s;
 }
@@ -676,11 +741,11 @@ function renderHistory() {
 // ─── Render Seat Chart ───────────────────────────────────────────────────────
 async function renderSeatChart() {
   const frame = document.getElementById('seatSvgFrame');
-  const svg = await loadSVG();
+  const svg = await loadSVG(activeCity);
 
   const citySessions = sessions.filter(s => s.city === activeCity);
   const allCitySeats = citySessions.flatMap(s => s.seats || []);
-  frame.innerHTML = highlightSeats(svg, allCitySeats);
+  frame.innerHTML = highlightSeats(svg, allCitySeats, activeCity);
 
   // Update venue info
   const cityData = CITIES[activeCity];
@@ -694,6 +759,25 @@ async function renderSeatChart() {
   if (venueNameMob) venueNameMob.textContent = cityData.venue;
   if (venueSubMob) venueSubMob.textContent = cityData.sub;
   if (deskCityName) deskCityName.textContent = activeCity;
+
+  // Update legend per city
+  const legendItems = document.getElementById('legendItems');
+  const legendLabel = document.getElementById('legendLabel');
+  if (legendItems) {
+    if (activeCity === '서울') {
+      if (legendLabel) legendLabel.textContent = '관람 횟수';
+      legendItems.innerHTML = `
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(127,230,240,.4)"></div><span style="color:var(--text2)">1회</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(127,230,240,.7)"></div><span style="color:var(--text2)">3회</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div><span style="color:var(--text2)">5회+</span></div>`;
+    } else {
+      if (legendLabel) legendLabel.textContent = '좌석 등급';
+      legendItems.innerHTML = `
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(242,180,138,.6);border:1px solid rgba(242,180,138,.8)"></div><span style="color:var(--text2)">R석</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(127,230,240,.5);border:1px solid rgba(127,230,240,.7)"></div><span style="color:var(--text2)">S석</span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div><span style="color:var(--text2)">휠체어석</span></div>`;
+    }
+  }
   if (deskVenueName) deskVenueName.textContent = cityData.venue;
   if (deskVenueMeta) deskVenueMeta.textContent = cityData.meta;
 
@@ -720,7 +804,7 @@ async function renderSeatChart() {
         ${chips ? `<div class="seat-chips">${chips}</div>` : ''}
         <div class="seat-input-row">
           <input class="seat-input" id="seat-input-${s.n}" type="text"
-            placeholder="구역명 + 번호 입력 (예: 48구역 89번)"
+            placeholder="${{ '서울':'48구역 89번', '대구':'라구역 12번', '부산':'C구역 15번', '광주':'나구역 08번' }[activeCity] || '구역명 + 번호 입력'}"
             onkeydown="if(event.key==='Enter')addSeat(${s.n})">
           <button class="seat-add-btn" onclick="addSeat(${s.n})">＋</button>
         </div>
@@ -969,16 +1053,20 @@ async function exportSeatImage() {
   const allCitySeats = citySessions.flatMap(s => s.seats || []);
 
   // SVG image — set explicit px dimensions so <img> knows natural size
-  const svg = await loadSVG();
-  const highlighted = highlightSeats(svg, allCitySeats)
-    .replace(/width="[^"]*"/, 'width="360"')
-    .replace(/<svg /, '<svg height="300" ');
+  const svg = await loadSVG(activeCity);
+  // Extract viewBox dimensions for correct aspect ratio
+  const vbMatch = svg.match(/viewBox="0 0 (\d+(?:\.\d+)?) (\d+(?:\.\d+)?)"/);
+  const svgNatW = vbMatch ? parseFloat(vbMatch[1]) : 360;
+  const svgNatH = vbMatch ? parseFloat(vbMatch[2]) : 300;
+  const highlighted = highlightSeats(svg, allCitySeats, activeCity)
+    .replace(/width="[^"]*"/, `width="${svgNatW}"`)
+    .replace(/<svg /, `<svg height="${svgNatH}" `);
   const blob = new Blob([highlighted], {type:'image/svg+xml;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   await new Promise(res => {
     const img = new Image();
     img.onload = () => {
-      const svgAR = 360/300;
+      const svgAR = svgNatW / svgNatH;
       const svgW = W - 88;
       const svgH = svgW / svgAR;
       const frameY = 234;
@@ -995,7 +1083,7 @@ async function exportSeatImage() {
     img.src = url;
   });
 
-  const svgDisplayH = (W-88)/360*300 + 24;
+  const svgDisplayH = (W-88)/svgNatW*svgNatH + 24;
   let y = 234 + svgDisplayH + 36;
 
   // Seats label
