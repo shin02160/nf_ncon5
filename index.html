@@ -594,8 +594,10 @@ function highlightSeats(svgStr, allSeats, city) {
   // Parse zone label from seat string depending on city
   function parseZone(seat) {
     if (city === '서울') {
-      const m = seat.match(/(\d+)구역/);
-      return m ? m[1] : null;
+      const mNum = seat.match(/(\d+)구역/);
+      if (mNum) return mNum[1];
+      const mFloor = seat.match(/^(?:스탠딩\s*)?([ABC])구역/i);
+      return mFloor ? mFloor[1].toUpperCase() : null;
     }
     if (city === '대구') {
       // e.g. "라구역 12번" or "1구역", "2구역" for numbered zones
@@ -637,8 +639,8 @@ function highlightSeats(svgStr, allSeats, city) {
       fill = 'rgba(127,230,240,0.35)'; stroke = '#7fe6f0'; strokeW = '1.2';
     }
 
-    if (city === '서울') {
-      // Seoul uses id="zone-N" paths
+    if (city === '서울' && !isNaN(zone)) {
+      // Seoul numbered zones (37–50): id-based path replacement
       s = s.replace(
         new RegExp(`(<path id="zone-${zone}"[^>]*?)fill="[^"]*" fill-opacity="[^"]*" stroke="[^"]*" stroke-width="[^"]*"([^>]*)>`),
         `$1fill="${fill}" fill-opacity="1" stroke="${stroke}" stroke-width="${strokeW}"$2${filterAttr}>`
@@ -648,25 +650,30 @@ function highlightSeats(svgStr, allSeats, city) {
         `$1fill="#ffffff"`
       );
     } else {
-      // Non-Seoul: rect/path and text are siblings.
-      // Match <rect or path with rgba fill> immediately followed by <text>ZONE</text>
+      // Floor zones (Seoul A/B/C) and all non-Seoul zones: text-label lookup.
+      // Finds the last shape with stroke="rgba(" before each matching text label.
       const escaped = zone.replace(/[-.*+?^${}()|[\]\\]/g, '\\$&');
-      s = s.replace(
-        new RegExp(
-          `(<(?:rect|path)[^>]*stroke="rgba\\([^>]*>)(\\s*<text[^>]*>\\s*${escaped}\\s*</text>)`,
-          'g'
-        ),
-        (match, elemPart, textPart) => {
-          const newElem = elemPart
-            .replace(/fill="rgba\([^"]*\)"/, `fill="${fill}"`)
-            .replace(/fill-opacity="[^"]*"\s*/g, '')
-            .replace(/stroke="rgba\([^"]*\)"/, `stroke="${stroke}"`)
-            .replace(/stroke-width="[^"]*"/, `stroke-width="${strokeW}"`)
-            .replace(/\s*filter="[^"]*"/, '')
-            .replace(/>$/, `${filterAttr}>`);
-          return newElem + textPart;
-        }
-      );
+      const textRe = new RegExp(`<text[^>]*>\\s*${escaped}\\s*</text>`, 'g');
+      const shapeRe = /(<(?:rect|path)[^>]*stroke="rgba\([^>]*>)/g;
+      let textMatch;
+      while ((textMatch = textRe.exec(s)) !== null) {
+        const before = s.substring(0, textMatch.index);
+        let lastShape = null, m;
+        shapeRe.lastIndex = 0;
+        while ((m = shapeRe.exec(before)) !== null) lastShape = m;
+        if (!lastShape) continue;
+        const oldShape = lastShape[0];
+        const newShape = oldShape
+          .replace(/fill="rgba\([^"]*\)"/, `fill="${fill}"`)
+          .replace(/fill-opacity="[^"]*"\s*/g, '')
+          .replace(/stroke="rgba\([^"]*\)"/, `stroke="${stroke}"`)
+          .replace(/stroke-width="[^"]*"/, `stroke-width="${strokeW}"`)
+          .replace(/\s*filter="[^"]*"/, '')
+          .replace(/>$/, `${filterAttr}>`);
+        if (oldShape === newShape) continue;
+        s = s.substring(0, lastShape.index) + newShape + s.substring(lastShape.index + oldShape.length);
+        textRe.lastIndex += newShape.length - oldShape.length;
+      }
     }
   });
   return s;
@@ -1114,24 +1121,26 @@ async function exportSeatImage() {
   const seatedSessions = citySessions.filter(s => s.seats && s.seats.length > 0);
   seatedSessions.forEach(s => {
     // Row label: "1회차 07.31"
-    ctx.fillStyle = '#6b7a96';
-    ctx.font = '600 11px "Pretendard Variable", "Pretendard", sans-serif';
-    ctx.fillText(`${s.n}회차  ${s.date}`, 44, y);
-    y += 18;
+    ctx.fillStyle = '#7d8ba6';
+    ctx.font = '500 11px "Pretendard Variable", "Pretendard", sans-serif';
+    ctx.fillText(`${s.n}회차`, 44, y);
+    ctx.fillStyle = '#9fb0cc';
+    ctx.fillText(s.date, 44 + ctx.measureText(`${s.n}회차  `).width, y);
+    y += 20;
     let cx = 44;
     s.seats.forEach((seat, i) => {
       const cc = chipColors[i % chipColors.length];
       ctx.font = '700 13px "Pretendard Variable", "Pretendard", sans-serif';
       const tw = ctx.measureText(seat).width;
-      const cw = tw + 24; const ch = 26;
-      if (cx + cw > W - 44) { cx = 44; y += 34; }
+      const cw = tw + 24; const ch = 28;
+      if (cx + cw > W - 44) { cx = 44; y += 36; }
       ctx.fillStyle = cc.bg;
-      roundRect(ctx, cx, y-17, cw, ch, 13); ctx.fill();
+      roundRect(ctx, cx, y-19, cw, ch, 14); ctx.fill();
       ctx.strokeStyle = cc.border; ctx.lineWidth = 1; ctx.stroke();
       ctx.fillStyle = cc.text; ctx.fillText(seat, cx+12, y+1);
       cx += cw + 8;
     });
-    y += 34;
+    y += 38;
   });
 
   // Footer
