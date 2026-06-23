@@ -605,8 +605,8 @@ function highlightSeats(svgStr, allSeats, city) {
       return m ? m[1] : null;
     }
     if (city === '부산') {
-      // e.g. "C구역 15번" → zone C
-      const m = seat.match(/^([A-Ga-g])구역/);
+      // e.g. "C구역 15번" → C, "OP구역" → OP, "A-1구역" → A-1, "2A구역" → 2A
+      const m = seat.match(/^(OP|2[A-E]|[A-G]-[12]|[A-GF])구역/i);
       return m ? m[1].toUpperCase() : null;
     }
     if (city === '광주') {
@@ -828,7 +828,7 @@ async function renderSeatChart() {
         ${chips ? `<div class="seat-chips">${chips}</div>` : ''}
         <div class="seat-input-row">
           <input class="seat-input" id="seat-input-${s.n}" type="text"
-            placeholder="${{ '서울':'48구역 89번', '대구':'라구역 12번', '부산':'C구역 15번', '광주':'나구역 08번' }[activeCity] || '구역명 + 번호 입력'}"
+            placeholder="${{ '서울':'48구역 89번', '대구':'라구역 12번', '부산':'A-1구역 12번', '광주':'나구역 08번' }[activeCity] || '구역명 + 번호 입력'}"
             onkeydown="if(event.key==='Enter')addSeat(${s.n})">
           <button class="seat-add-btn" onclick="addSeat(${s.n})">＋</button>
         </div>
