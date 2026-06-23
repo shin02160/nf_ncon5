@@ -5,10 +5,10 @@
 <text x="180" y="25" text-anchor="middle" font-size="9" letter-spacing="3" fill="#aef6fb" font-family="&#39;Space Grotesk&#39;,sans-serif" font-weight="700">STAGE</text>
 
 
-<path d="M128 55 L134 40 L152 40 L152 55 Z" fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1" stroke-linejoin="round"></path>
+<path d="M112 55 L118 40 L152 40 L152 55 Z" fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1" stroke-linejoin="round"></path>
 <rect x="158" y="40" width="44" height="15" rx="2" fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1"></rect>
 <text x="180" y="51" text-anchor="middle" font-size="7.5" font-weight="700" fill="#f2c9a8" font-family="&#39;Space Grotesk&#39;,sans-serif">OP</text>
-<path d="M208 40 L258 40 L264 55 L208 55 Z" fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1" stroke-linejoin="round"></path>
+<path d="M208 40 L242 40 L248 55 L208 55 Z" fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1" stroke-linejoin="round"></path>
 
 
 <path d="M16 118 L16 80 L60 63 L80 63 L80 118 Z" fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1.1" stroke-linejoin="round"></path>

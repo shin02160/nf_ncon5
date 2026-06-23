@@ -1077,7 +1077,7 @@ async function exportSeatImage() {
   const svgNatH = vbMatch ? parseFloat(vbMatch[2]) : 300;
   const highlighted = highlightSeats(svg, allCitySeats, activeCity)
     .replace(/width="[^"]*"/, `width="${svgNatW}"`)
-    .replace(/<svg /, `<svg height="${svgNatH}" `);
+    .replace(/<svg /, `<svg xmlns="http://www.w3.org/2000/svg" height="${svgNatH}" `);
   const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(highlighted);
   await new Promise(res => {
     const img = new Image();
