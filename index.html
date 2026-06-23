@@ -102,7 +102,7 @@ body{height:100%;background:#05070f;color:#eaf2ff;font-family:'Pretendard Variab
 .session-date{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:600;color:var(--text)}
 .session-seat{font-size:10px;color:var(--muted);margin-top:2px}
 .session-city-tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px;flex-shrink:0}
-.session-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0;margin-left:auto;white-space:nowrap}
+.session-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;flex-shrink:0;margin-left:auto;white-space:nowrap;min-width:60px;text-align:center}
 
 /* ─── Schedule (3-state) ─── */
 .schedule-row{display:flex;align-items:center;gap:0;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.025);margin-bottom:8px;cursor:pointer;user-select:none;transition:border-color .2s,background .2s;position:relative;overflow:hidden}
@@ -243,11 +243,11 @@ body{height:100%;background:#05070f;color:#eaf2ff;font-family:'Pretendard Variab
       <img src="assets/nflying-logo-white.png" alt="N.Flying">
     </div>
     <nav class="sidebar-nav">
-      <button class="sidebar-nav-btn" data-view="schedule" onclick="switchView('schedule',true)">
+      <button class="sidebar-nav-btn active" data-view="schedule" onclick="switchView('schedule',true)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         공연 일정
       </button>
-      <button class="sidebar-nav-btn active" data-view="seatchart" onclick="switchView('seatchart',true)">
+      <button class="sidebar-nav-btn" data-view="seatchart" onclick="switchView('seatchart',true)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="7"/><path d="M9 10h6M12 7v6"/></svg>
         좌석 배치도
       </button>
@@ -552,29 +552,25 @@ function initHeroStars() {
 // ─── SVG ────────────────────────────────────────────────────────────────────
 const svgCache = {};
 function normalizeSvg(svgStr) {
-  // Strip design-preview sample highlights so only user-entered seats get highlighted.
-  // Handles optional stroke-linejoin="round" between stroke-width and filter.
-  const stripHighlight = (color, neutralFill, neutralStroke) =>
-    svgStr
-      .replace(
-        new RegExp(`fill="${color.replace('#','\\#')}" fill-opacity="0\\.82" stroke="${color.replace('#','\\#')}" stroke-width="[^"]*"(\\s+stroke-linejoin="[^"]*")?\\s+filter="url\\(#glow[A-Z]*\\)"`, 'g'),
-        `fill="${neutralFill}" stroke="${neutralStroke}" stroke-width="1.1"`
-      );
-  // Seoul zones: dark fill, strip pink/violet highlights → neutral dark
-  let s = svgStr
-    .replace(/fill="#ef9cc2" fill-opacity="0\.82" stroke="#ef9cc2" stroke-width="[^"]*"(\s+stroke-linejoin="[^"]*")?\s+filter="url\(#glow[A-Z]*\)"/g,
-             'fill="#0c1626" fill-opacity="1" stroke="rgba(127,230,240,0.5)" stroke-width="1"')
-    .replace(/fill="#b9a7e6" fill-opacity="0\.82" stroke="#b9a7e6" stroke-width="[^"]*"(\s+stroke-linejoin="[^"]*")?\s+filter="url\(#glow[A-Z]*\)"/g,
-             'fill="#0c1626" fill-opacity="1" stroke="rgba(127,230,240,0.5)" stroke-width="1"');
-  // Non-Seoul zones: orange R-zone fill
-  s = s
-    .replace(/fill="#ef9cc2" fill-opacity="0\.82" stroke="#ef9cc2" stroke-width="[^"]*"(\s+filter="url\(#glow[A-Z]*\)")?/g,
-             'fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1.1"')
-    .replace(/fill="#b9a7e6" fill-opacity="0\.82" stroke="#b9a7e6" stroke-width="[^"]*"(\s+filter="url\(#glow[A-Z]*\)")?/g,
-             'fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1.1"');
-  // Restore text fill that was white due to highlight → neutral zone color
-  s = s.replace(/(<text id="zone-text-\d+"[^>]*)fill="#ffffff"/g, '$1fill="#9fd9e6"');
-  return s;
+  // Detect Seoul by its ungated glow filter ID ("glow" not followed by a letter).
+  const isSeoul = /id="glow"/.test(svgStr);
+  if (isSeoul) {
+    // Seoul zones: dark fill — strip pink/violet sample highlights
+    return svgStr
+      .replace(/fill="#ef9cc2" fill-opacity="0\.82" stroke="#ef9cc2" stroke-width="[^"]*"(\s+stroke-linejoin="[^"]*")?\s+filter="url\(#glow[A-Z]*\)"/g,
+               'fill="#0c1626" fill-opacity="1" stroke="rgba(127,230,240,0.5)" stroke-width="1"')
+      .replace(/fill="#b9a7e6" fill-opacity="0\.82" stroke="#b9a7e6" stroke-width="[^"]*"(\s+stroke-linejoin="[^"]*")?\s+filter="url\(#glow[A-Z]*\)"/g,
+               'fill="#0c1626" fill-opacity="1" stroke="rgba(127,230,240,0.5)" stroke-width="1"')
+      .replace(/(<text id="zone-text-\d+"[^>]*)fill="#ffffff"/g, '$1fill="#9fd9e6"');
+  } else {
+    // Non-Seoul zones: orange fill — strip pink/violet sample highlights
+    return svgStr
+      .replace(/fill="#ef9cc2" fill-opacity="0\.82" stroke="#ef9cc2" stroke-width="[^"]*"(\s+filter="url\(#glow[A-Z]*\)")?/g,
+               'fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1.1"')
+      .replace(/fill="#b9a7e6" fill-opacity="0\.82" stroke="#b9a7e6" stroke-width="[^"]*"(\s+filter="url\(#glow[A-Z]*\)")?/g,
+               'fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1.1"')
+      .replace(/(<text[^>]*)fill="#ffffff"/g, '$1fill="#f2c9a8"');
+  }
 }
 
 async function loadSVG(city) {
@@ -1082,8 +1078,7 @@ async function exportSeatImage() {
   const highlighted = highlightSeats(svg, allCitySeats, activeCity)
     .replace(/width="[^"]*"/, `width="${svgNatW}"`)
     .replace(/<svg /, `<svg height="${svgNatH}" `);
-  const blob = new Blob([highlighted], {type:'image/svg+xml;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
+  const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(highlighted);
   await new Promise(res => {
     const img = new Image();
     img.onload = () => {
@@ -1097,10 +1092,9 @@ async function exportSeatImage() {
       ctx.strokeStyle = 'rgba(127,230,240,.18)'; ctx.lineWidth = 1; ctx.stroke();
       ctx.drawImage(img, 54, frameY+12, svgW-20, svgH);
       ctx.restore();
-      URL.revokeObjectURL(url);
       res();
     };
-    img.onerror = () => { URL.revokeObjectURL(url); res(); };
+    img.onerror = () => res();
     img.src = url;
   });
 
@@ -1112,24 +1106,32 @@ async function exportSeatImage() {
   ctx.font = '600 12px "Pretendard Variable", "Pretendard", sans-serif';
   ctx.fillText('내 좌석', 44, y); y += 22;
 
-  // Seat chips (unique seats)
+  // Seat info per session (only sessions with seats)
   const chipColors = [
     {bg:'rgba(239,156,194,.22)',text:'#ffd7e8',border:'rgba(239,156,194,.5)'},
     {bg:'rgba(185,167,230,.22)',text:'#e6dcff',border:'rgba(185,167,230,.5)'},
   ];
-  const uniqueSeats = [...new Set(allCitySeats)];
-  let cx = 44;
-  uniqueSeats.forEach((seat, i) => {
-    const cc = chipColors[i % chipColors.length];
-    ctx.font = '700 14px "Pretendard Variable", "Pretendard", sans-serif';
-    const tw = ctx.measureText(seat).width;
-    const cw = tw + 26; const ch = 28;
-    if (cx + cw > W - 44) { cx = 44; y += 38; }
-    ctx.fillStyle = cc.bg;
-    roundRect(ctx, cx, y-18, cw, ch, 14); ctx.fill();
-    ctx.strokeStyle = cc.border; ctx.lineWidth = 1; ctx.stroke();
-    ctx.fillStyle = cc.text; ctx.fillText(seat, cx+13, y+2);
-    cx += cw + 10;
+  const seatedSessions = citySessions.filter(s => s.seats && s.seats.length > 0);
+  seatedSessions.forEach(s => {
+    // Row label: "1회차 07.31"
+    ctx.fillStyle = '#6b7a96';
+    ctx.font = '600 11px "Pretendard Variable", "Pretendard", sans-serif';
+    ctx.fillText(`${s.n}회차  ${s.date}`, 44, y);
+    y += 18;
+    let cx = 44;
+    s.seats.forEach((seat, i) => {
+      const cc = chipColors[i % chipColors.length];
+      ctx.font = '700 13px "Pretendard Variable", "Pretendard", sans-serif';
+      const tw = ctx.measureText(seat).width;
+      const cw = tw + 24; const ch = 26;
+      if (cx + cw > W - 44) { cx = 44; y += 34; }
+      ctx.fillStyle = cc.bg;
+      roundRect(ctx, cx, y-17, cw, ch, 13); ctx.fill();
+      ctx.strokeStyle = cc.border; ctx.lineWidth = 1; ctx.stroke();
+      ctx.fillStyle = cc.text; ctx.fillText(seat, cx+12, y+1);
+      cx += cw + 8;
+    });
+    y += 34;
   });
 
   // Footer
@@ -1205,7 +1207,11 @@ window.addEventListener('resize', () => { checkDesktop(); });
 // ─── Init ─────────────────────────────────────────────────────────────────────
 checkDesktop();
 initHeroStars();
-renderHome();
+if (window.innerWidth >= 800) {
+  switchView('schedule', true);
+} else {
+  renderHome();
+}
 renderSidebar();
 </script>
 </body>
