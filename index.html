@@ -692,12 +692,12 @@ function getFavoriteZone() {
   const counts = {};
   sessions.forEach(s => {
     (s.seats || []).forEach(seat => {
-      const z = seat.match(/(\d+)구역/);
+      const z = seat.match(/^([^\s]+구역)/);
       if (z) counts[z[1]] = (counts[z[1]] || 0) + 1;
     });
   });
   const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
-  return top ? `${top[0]}구역` : '—';
+  return top ? top[0] : '—';
 }
 function getTopCity() {
   const regions = getRegionStats();
@@ -1126,7 +1126,7 @@ async function exportSeatImage() {
     ctx.fillText(`${s.n}회차`, 44, y);
     ctx.fillStyle = '#9fb0cc';
     ctx.fillText(s.date, 44 + ctx.measureText(`${s.n}회차  `).width, y);
-    y += 20;
+    y += 36;
     let cx = 44;
     s.seats.forEach((seat, i) => {
       const cc = chipColors[i % chipColors.length];
