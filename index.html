@@ -552,12 +552,29 @@ function initHeroStars() {
 // ─── SVG ────────────────────────────────────────────────────────────────────
 const svgCache = {};
 function normalizeSvg(svgStr) {
-  // Strip design-preview sample highlights so only user-entered seats get highlighted
-  return svgStr
-    .replace(/fill="#ef9cc2" fill-opacity="0\.82" stroke="#ef9cc2" stroke-width="1\.6" filter="url\(#glow[A-Z]*\)"/g,
+  // Strip design-preview sample highlights so only user-entered seats get highlighted.
+  // Handles optional stroke-linejoin="round" between stroke-width and filter.
+  const stripHighlight = (color, neutralFill, neutralStroke) =>
+    svgStr
+      .replace(
+        new RegExp(`fill="${color.replace('#','\\#')}" fill-opacity="0\\.82" stroke="${color.replace('#','\\#')}" stroke-width="[^"]*"(\\s+stroke-linejoin="[^"]*")?\\s+filter="url\\(#glow[A-Z]*\\)"`, 'g'),
+        `fill="${neutralFill}" stroke="${neutralStroke}" stroke-width="1.1"`
+      );
+  // Seoul zones: dark fill, strip pink/violet highlights → neutral dark
+  let s = svgStr
+    .replace(/fill="#ef9cc2" fill-opacity="0\.82" stroke="#ef9cc2" stroke-width="[^"]*"(\s+stroke-linejoin="[^"]*")?\s+filter="url\(#glow[A-Z]*\)"/g,
+             'fill="#0c1626" fill-opacity="1" stroke="rgba(127,230,240,0.5)" stroke-width="1"')
+    .replace(/fill="#b9a7e6" fill-opacity="0\.82" stroke="#b9a7e6" stroke-width="[^"]*"(\s+stroke-linejoin="[^"]*")?\s+filter="url\(#glow[A-Z]*\)"/g,
+             'fill="#0c1626" fill-opacity="1" stroke="rgba(127,230,240,0.5)" stroke-width="1"');
+  // Non-Seoul zones: orange R-zone fill
+  s = s
+    .replace(/fill="#ef9cc2" fill-opacity="0\.82" stroke="#ef9cc2" stroke-width="[^"]*"(\s+filter="url\(#glow[A-Z]*\)")?/g,
              'fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1.1"')
-    .replace(/fill="#b9a7e6" fill-opacity="0\.82" stroke="#b9a7e6" stroke-width="1\.6" filter="url\(#glow[A-Z]*\)"/g,
+    .replace(/fill="#b9a7e6" fill-opacity="0\.82" stroke="#b9a7e6" stroke-width="[^"]*"(\s+filter="url\(#glow[A-Z]*\)")?/g,
              'fill="rgba(242,180,138,0.06)" stroke="rgba(242,180,138,0.42)" stroke-width="1.1"');
+  // Restore text fill that was white due to highlight → neutral zone color
+  s = s.replace(/(<text id="zone-text-\d+"[^>]*)fill="#ffffff"/g, '$1fill="#9fd9e6"');
+  return s;
 }
 
 async function loadSVG(city) {
@@ -740,6 +757,10 @@ function renderHistory() {
 
 // ─── Render Seat Chart ───────────────────────────────────────────────────────
 async function renderSeatChart() {
+  // Sync city tab highlight with activeCity
+  document.querySelectorAll('.city-tab').forEach(t => t.classList.toggle('active', t.dataset.city === activeCity));
+  document.querySelectorAll('.desk-city-tab').forEach(t => t.classList.toggle('active', t.dataset.city === activeCity));
+
   const frame = document.getElementById('seatSvgFrame');
   const svg = await loadSVG(activeCity);
 
