@@ -605,8 +605,8 @@ function highlightSeats(svgStr, allSeats, city) {
       return m ? m[1] : null;
     }
     if (city === '부산') {
-      // e.g. "C구역 15번" → C, "OP구역" → OP, "A-1구역" → A-1, "2A구역" → 2A
-      const m = seat.match(/^(OP|2[A-E]|1[B-D]|[A-G]-[12]|[A-GF])구역/i);
+      // e.g. "C구역 15번" → C, "OP-1구역" → OP-1, "A-1구역" → A-1, "2A구역" → 2A
+      const m = seat.match(/^(OP-[123]|2[A-E]|1[B-D]|[A-G]-[12]|[A-GF])구역/i);
       return m ? m[1].toUpperCase() : null;
     }
     if (city === '광주') {
